@@ -35,9 +35,108 @@ In summary the following observations are being made:
 \end{itemize}
 
 \paragraph{}
-TODO: Pedepse si recompense
+In order for the agent to be able to learn to solve a specific problem, in this case, to reach a target, it must be rewarded or punished according to the actions that were taken. It is important to be mindful of the rewards that are given to the agent because only giving rewards and not punishing it can lead the agent to learn a behaviour that will maximize its reward, but will not be able to solve the problem, as it will be described shortly.
+
+To begin, the first reward that was implemented, was the reward for reaching the objective, which is the goal of the agent and should also be a substantial reward. The other rewards that ware added were based on the direction of the movement and how close to the target it was, the reward increasing in value if the agent was closer to the objective (\ref{reward:1}) and a reward if the raycasts are hitting the destination object, which also increases in value if the agent is closer to the target (\ref{reward:2}). 
+
+\begin{equation} \label{reward:1}
+    R = \frac{(1 - \frac{\alpha}{180}) \cdot r}{d}
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$\alpha$]: is the angle between the agent's current direction and the optimal direction
+    \item [$r$]: is the reward that is obtained if the agent has the optimal direction
+    \item [$d$]: is the distance from the agent to the objective
+\end{itemize}
+
+\begin{equation} \label{reward:2}
+    R = \frac{r}{d_{i}}
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$r$]: is the reward obtained if the distance between the agent and the objective is minimum
+    \item [$d_{i}$]: is the obtained distance by the raycast $i$ from the agent to the object
+\end{itemize}
+
+However, these three rewards are not enough for the agent: through learning experiments it was observed that the agent was performing poorly: it would get stuck trying to move through a wall, it would never reach the objective and just spin around, or in some cases, it would just stand still.
+
+To solve these problems, several punishments were implemented to correct the behavior of the agent. To prevent the agent for not moving, a constant penalty was added, to incentivise the agent to move towards the reward, so that it will receive a reward. Also, to comabat standing still, if the agent does not move, it receives an additional penalty, and if it does not move for more than 100 time steps, it receives a huge penalty and the episode ends. 
+
+To stop the agent from trying to pass thorugh walls, a penalty is added if the raycasts that hit walls or other objects in the environment, have the distance to the hit object be a smaller than a given number. This penalty also increases the closer the agent gets to a wall (\ref{punishment:1}). 
+
+\begin{equation} \label{punishment:1}
+    R = \frac{p}{d_{i}}, \text{if } d_{i} < d
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$p$]: is the penalty obtained if the distance between the agent and the wall/environmental object is minimum
+    \item [$d_{i}$]: is the obtained distance by the raycast $i$ from the agent to the object
+    \item [$d$]: is the maximum distance for which the penalty is applied
+\end{itemize}
+
+Another penalty was added if the agent is moving away from objective, and as before, it increases the further away it gets from the objective (\ref{punishment:2}). 
+
+\begin{equation} \label{punishment:2}
+    R = \frac{\alpha}{180} \cdot p
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$p$]: is the penalty obtained if the distance between the agent and the wall/environmental object is minimum
+    \item [$\alpha$]: is the angle between the agent's current direction and the optimal direction
+\end{itemize}
+
+Through training, two undesirable behaviours were observed: it was observed that the agent would sometimes make sudden jerky movments, trying to change its direction and immediatly returning to its previous trajectory, and that the agent would learn to drive backwards. To fix the first problem, a penalty was added if the agent would change its direction (\ref{punishment:3}), and to fix the second one, a penalty was added if the tank was moving backwards (\ref{punishment:4}).
+
+\begin{equation} \label{punishment:3}
+    R = \frac{\alpha}{180} \cdot p
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$p$]: is the penalty obtained for changing the movement direction
+    \item [$\alpha$]: is the angle between the agent's current direction and its previous direction
+\end{itemize}
+
+\begin{equation} \label{punishment:4}
+    R = \frac{\alpha}{180} \cdot p, \text{if } \alpha > 90
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$p$]: is the penalty obtained for changing the movement direction
+    \item [$\alpha$]: is the angle between the agent's current direction and its forward vector
+\end{itemize}
+
+In summary, the used rewards and penalites and their values can be seen in table \ref{reward_punish_table:1}
+
+\begin{table}
+    \begin{tabular}{|| m{15em} | m{4em} | m{15em} ||}
+    \hline \hline
+    Name & Value & Notes \\ \hline \hline
+    Reach Objective Reward & 10 &  \\ \hline
+    Move Towards Objective Reward & 0.001 & is scaled by the distance between agent and objective \\ \hline
+    Raycast Touches Objective Reward & 0.001 & is scaled by the distance between agent and objective \\ \hline
+    Constant Penalty & -0.005 & is applied at each time step \\ \hline
+    Not Moving Penalty & -0.05 &  \\ \hline
+    Not Moving For 100 Steps Penalty & -50 &  \\ \hline
+    Moving Towards Wall Penalty & -0.002 & is scaled by the distance between agent and object \\ \hline
+    Moving Away From Objective Penalty & -0.025 & is scaled by the distance between agent and objective \\ \hline
+    Sudden Movement Penalty & -0.01 & is scaled by the angle between the agent's current direction and its previous one \\ \hline
+    Moving Backwards Penalty & -0.005 &  \\ \hline \hline
+    \end{tabular}
+    \caption{Rewards and Penalites}
+    \label{reward_punish_table:1}
+\end{table}
 
 \subsection{Training}
+
+Each training session consisted of $10^7$ steps, and 30 agents were trained in parallel. The training times were between 3-4 hours. The agents are supposed to learn to reach an objective which appears in one of 17 predefined positions on the map. Once the agent reaches the objective, it is moved in another location chosen randomly. Each separate training instance uses the same seed for the random number generator, so that the objectives will appear in the same order for each of the training instances.
+
+In the initial training sessions, the agents were unable to learn to reach the objective, becoming stuck rotating in a circle. A proposed solution was to keep the objective in the same position until the agent reaches it 30 times. After reaching the objective 30 times, the objective would start appearing in the random predefined locations. This was done to possibly kickstart the agent's learning process, but the approach failed, the agent being unable to learn to reach the objective. Another approach was to increase the neural network's size, however this approach prove unsuccessful as well. The approach that worked was to remove the agent's postion and the objective's position from the observations.
 
 TODO:
 
@@ -47,5 +146,9 @@ Despre ce sa scriu:
 - faptu ca initial nu a mers cand am bagat pozitiile
 - am 30 de agenti care se antreneaza in paralel
 - la training sa zic despre configuratiile folosite si sa fac grafice cu mean rewards
+- ca i-am bagat
 \section{Reaching a moving target}
+
+TODO:
+- sa zic ca am incercat sa ii bag memorie recurenta si nu a mers
 \section{Shooting a moving target}
