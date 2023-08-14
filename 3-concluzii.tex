@@ -116,7 +116,7 @@ In summary, the used rewards and penalites and their values can be seen in table
 \begin{table}
     \begin{tabular}{|| m{15em} | m{4em} | m{15em} ||}
     \hline \hline
-    Name & Value & Notes \\ \hline \hline
+    \strong{Name} & \strong{Value} & \strong{Notes} \\ \hline \hline
     Reach Objective Reward & 10 &  \\ \hline
     Move Towards Objective Reward & 0.001 & is scaled by the distance between agent and objective \\ \hline
     Raycast Touches Objective Reward & 0.001 & is scaled by the distance between agent and objective \\ \hline
@@ -136,9 +136,72 @@ In summary, the used rewards and penalites and their values can be seen in table
 
 Each training session consisted of $10^7$ steps, and 30 agents were trained in parallel. The training times were between 3-4 hours. The agents are supposed to learn to reach an objective which appears in one of 17 predefined positions on the map. Once the agent reaches the objective, it is moved in another location chosen randomly. Each separate training instance uses the same seed for the random number generator, so that the objectives will appear in the same order for each of the training instances.
 
-In the initial training sessions, the agents were unable to learn to reach the objective, becoming stuck rotating in a circle. A proposed solution was to keep the objective in the same position until the agent reaches it 30 times. After reaching the objective 30 times, the objective would start appearing in the random predefined locations. This was done to possibly kickstart the agent's learning process, but the approach failed, the agent being unable to learn to reach the objective. Another approach was to increase the neural network's size, however this approach prove unsuccessful as well. The approach that worked was to remove the agent's postion and the objective's position from the observations.
+In the initial training sessions, the agents were unable to learn to reach the objective, becoming stuck rotating in a circle. A proposed solution was to keep the objective in the same position until the agent reaches it 30 times. After reaching the objective 30 times, the objective would start appearing in the random predefined locations. This was done to possibly kickstart the agent's learning process, but the approach failed, the agent being unable to learn to reach the objective. Another approach was to increase the neural network's size, however this approach prove unsuccessful as well. The approach that worked was to remove the agent's postion and the objective's position from the observations. TODO: sa zic si de curiosity
 
-TODO:
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_static_target_1_layers.eps}
+        \caption{Training results with 1 layer of units}
+        \label{train_results_static_1_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_static_target_3_layers.eps}
+        \caption{Training results with 3 layers of units}
+        \label{train_results_static_3_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_static_target_5_layers.eps}
+        \caption{Training results with 5 layers of units}
+        \label{train_results_static_5_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_static_target_7_layers.eps}
+        \caption{Training results with 7 layers of units}
+        \label{train_results_static_7_layers}
+    \end{center}
+\end{figure}
+
+TODO: se poate observa ca la 128 units e cel mai bine
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{15em} | m{15em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & 147.568 \\ \hline
+    1 layer, 256 units & DNF \\ \hline
+    1 layer, 512 units & 124.221 \\ \hline
+    3 layers, 128 units & 148.136 \\ \hline
+    3 layers, 256 units & 144.366 \\ \hline
+    3 layers, 512 units & 114.828 \\ \hline
+    5 layers, 128 units & 141.369 \\ \hline
+    5 layers, 256 units & 113.478 \\ \hline
+    5 layers, 512 units & 153.709 \\ \hline
+    7 layers, 128 units & 125.727 \\ \hline
+    7 layers, 256 units & 125.441 \\ \hline
+    7 layers, 512 units & 92.128 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results}
+    \label{move_to_static_targets_table:1}
+\end{table}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_static_target_bar_chart.eps}
+        \caption{Training results for all network configurations}
+        \label{train_results_static_bar_chart}
+    \end{center}
+\end{figure}
+
 
 Despre ce sa scriu:
 - ce observatii am ales
@@ -146,9 +209,99 @@ Despre ce sa scriu:
 - faptu ca initial nu a mers cand am bagat pozitiile
 - am 30 de agenti care se antreneaza in paralel
 - la training sa zic despre configuratiile folosite si sa fac grafice cu mean rewards
-- ca i-am bagat
+- ca i-am bagat 
+
+
 \section{Reaching a moving target}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_moving_target_1_layers.eps}
+        \caption{Training results with 1 layer of units}
+        \label{train_results_moving_1_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_moving_target_3_layers.eps}
+        \caption{Training results with 3 layers of units}
+        \label{train_results_moving_3_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_moving_target_5_layers.eps}
+        \caption{Training results with 5 layers of units}
+        \label{train_results_moving_5_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_moving_target_1_layers_with_dir.eps}
+        \caption{Training results with 1 layer of units and with observation of target's direction}
+        \label{train_results_moving_1_layers_with_dir}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_moving_target_3_layers_with_dir.eps}
+        \caption{Training results with 3 layers of units and with observation of target's direction}
+        \label{train_results_moving_3_layers_with_dir}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_moving_target_5_layers_with_dir.eps}
+        \caption{Training results with 5 layers of units and with observation of target's direction}
+        \label{train_results_moving_5_layers_with_dir}
+    \end{center}
+\end{figure}
+
+
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{11.3em} | m{10em} | m{9.6em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Observed target's direction} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & No & 184.547 \\ \hline
+    1 layer, 128 units & Yes & 191.184 \\ \hline
+    1 layer, 256 units & No & 184.563 \\ \hline
+    1 layer, 256 units & Yes & 137.075 \\ \hline
+    1 layer, 512 units & No & 185.936 \\ \hline
+    1 layer, 512 units & Yes & 178.876 \\ \hline
+    3 layers, 128 units & No & 183.288 \\ \hline
+    3 layers, 128 units & Yes & 200.502 \\ \hline
+    3 layers, 256 units & No & 181.435 \\ \hline
+    3 layers, 256 units & Yes & 196.064 \\ \hline
+    3 layers, 512 units & No & 142.54 \\ \hline
+    3 layers, 512 units & Yes & 210.524 \\ \hline
+    5 layers, 128 units & No & 174.404 \\ \hline
+    5 layers, 128 units & Yes & 191.399 \\ \hline
+    5 layers, 256 units & No & 159.966 \\ \hline
+    5 layers, 256 units & Yes & 164.351 \\ \hline
+    5 layers, 512 units & No & 147.922 \\ \hline
+    5 layers, 512 units & Yes & 193.828 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results}
+    \label{move_to_moving_targets_table:1}
+\end{table}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{move_to_moving_target_bar_chart.eps}
+        \caption{Training results for all network configurations}
+        \label{train_results_moving_bar_chart}
+    \end{center}
+\end{figure}
 
 TODO:
 - sa zic ca am incercat sa ii bag memorie recurenta si nu a mers
+
+
 \section{Shooting a moving target}
