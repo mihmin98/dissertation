@@ -136,7 +136,15 @@ In summary, the used rewards and penalites and their values can be seen in table
 
 Each training session consisted of $10^7$ steps, and 30 agents were trained in parallel. The training times were between 3-4 hours. The agents are supposed to learn to reach an objective which appears in one of 17 predefined positions on the map. Once the agent reaches the objective, it is moved in another location chosen randomly. Each separate training instance uses the same seed for the random number generator, so that the objectives will appear in the same order for each of the training instances.
 
-In the initial training sessions, the agents were unable to learn to reach the objective, becoming stuck rotating in a circle. A proposed solution was to keep the objective in the same position until the agent reaches it 30 times. After reaching the objective 30 times, the objective would start appearing in the random predefined locations. This was done to possibly kickstart the agent's learning process, but the approach failed, the agent being unable to learn to reach the objective. Another approach was to increase the neural network's size, however this approach prove unsuccessful as well. The approach that worked was to remove the agent's postion and the objective's position from the observations. TODO: sa zic si de curiosity
+In the initial training sessions, the agents were unable to learn to reach the objective, becoming stuck rotating in a circle. A proposed solution was to keep the objective in the same position until the agent reaches it 30 times. After reaching the objective 30 times, the objective would start appearing in the random predefined locations. This was done to possibly kickstart the agent's learning process, but the approach failed, the agent being unable to learn to reach the objective. Another approach was to increase the neural network's size, however this approach prove unsuccessful as well. The approach that worked was to remove the agent's postion and the objective's position from the observations. TODO: sa zic de curiosity
+
+The agent's training process was done using multiple neural network configurations, including different number of network layers ($1$, $3$, $5$, $7$) and different number of units per layer ($128$, $256$, $512$). The minimum number of units chosen was $128$ because the number of observations was higher than $64$ and less than $128$ (TODO: see if you can keep this)
+
+\paragraph{}
+The results for training the agent with 1 network layer can be seen in Figure \ref{train_results_static_1_layers}, and in Table \ref{move_to_static_targets_table:1}. In this case, the configuration with $256$ units was not able to be trained properly, remaining stuck moving in a circle. Between the two configurations that were successfully trained, it can be seen that the one with $128$ units, performed better during the training process than the one with $512$ units, obtaining, at the end, a mean reward that is higher by $18.79\%$.
+
+
+TODO: sa zic la concluzie la training ca alea cu mai utine units obtin mai tot timpu rezultate mai bune ca sunt mai mici si se antreneaza mai usor
 
 \begin{figure}
     \begin{center}
@@ -146,6 +154,10 @@ In the initial training sessions, the agents were unable to learn to reach the o
     \end{center}
 \end{figure}
 
+
+\paragraph{}
+The results for training the agent with 3 network layers can be seen in Figure \ref{train_results_static_3_layers}, and in Table \ref{move_to_static_targets_table:1}. From these results, it can be seen that the configurations with $128$ and $256$ units, performed very similarily during the training, however, the one with $512$ units started to lag behind these two at around $4 \cdot 10^6$ steps. Again, the configuration with the least units had the best training results, obtaining a result that is $2.61\%$ better than the one with with $256$ units and better by $29\%$ than the one with $512$ units. 
+
 \begin{figure}
     \begin{center}
         \includegraphics[width=\linewidth]{move_to_static_target_3_layers.eps}
@@ -153,6 +165,10 @@ In the initial training sessions, the agents were unable to learn to reach the o
         \label{train_results_static_3_layers}
     \end{center}
 \end{figure}
+
+
+\paragraph{}
+Results for training the agent with 5 network layers can be seen in Figure \ref{train_results_static_5_layers}, and in Table \ref{move_to_static_targets_table:1}. From the training results, it can be seen that in the later stages, the configuration with $256$ units falls behind the other two. Unlike the results with 1 layer and 3 layers
 
 \begin{figure}
     \begin{center}
@@ -170,7 +186,6 @@ In the initial training sessions, the agents were unable to learn to reach the o
     \end{center}
 \end{figure}
 
-TODO: se poate observa ca la 128 units e cel mai bine
 
 \begin{table}
     \centering
@@ -305,3 +320,131 @@ TODO:
 
 
 \section{Shooting a moving target}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_1_layers.eps}
+        \caption{Training results with 1 layer of units}
+        \label{train_results_shoot_1_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_3_layers.eps}
+        \caption{Training results with 3 layers of units}
+        \label{train_results_shoot_3_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_5_layers.eps}
+        \caption{Training results with 5 layers of units}
+        \label{train_results_shoot_5_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_7_layers.eps}
+        \caption{Training results with 7 layers of units}
+        \label{train_results_shoot_7_layers}
+    \end{center}
+\end{figure}
+
+
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_128_1_layers.eps}
+        \caption{Training results with 1 layer of units}
+        \label{train_results_shoot_obs_comparasion_1_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_128_3_layers.eps}
+        \caption{Training results with 3 layers of units}
+        \label{train_results_shoot_obs_comparasion_3_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_128_5_layers.eps}
+        \caption{Training results with 5 layers of units}
+        \label{train_results_shoot_obs_comparasion_5_layers}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_128_7_layers.eps}
+        \caption{Training results with 7 layers of units}
+        \label{train_results_shoot_obs_comparasion_7_layers}
+    \end{center}
+\end{figure}
+
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{15em} | m{15em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & 183.278 \\ \hline
+    1 layer, 256 units & 138.719 \\ \hline
+    1 layer, 512 units & 166.612 \\ \hline
+    3 layers, 128 units & 162.629 \\ \hline
+    3 layers, 256 units & 139.293 \\ \hline
+    3 layers, 512 units & 115.129 \\ \hline
+    5 layers, 128 units & 130.032 \\ \hline
+    5 layers, 256 units & 127.781 \\ \hline
+    5 layers, 512 units & 100.497 \\ \hline
+    7 layers, 128 units & 123.777 \\ \hline
+    7 layers, 256 units & 111.752 \\ \hline
+    7 layers, 512 units & 95.882 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results}
+    \label{shoot_moving_targets_table:1}
+\end{table}
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{12em} | m{12em} | m{10em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Bullet Observations} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & Bullet's direction and speed & 156.766 \\ \hline
+    1 layer, 128 units & Bullet's speed & 166.427 \\ \hline
+    1 layer, 128 units & Only if bullet was fired & 183.278 \\ \hline
+    3 layers, 128 units & Bullet's direction and speed & 152.188 \\ \hline
+    3 layers, 128 units & Bullet's speed & 163.311 \\ \hline
+    3 layers, 128 units & Only if bullet was fired & 162.629 \\ \hline
+    5 layers, 128 units & Bullet's direction and speed & 153.46 \\ \hline
+    5 layers, 128 units & Bullet's speed & 137.391 \\ \hline
+    5 layers, 128 units & Only if bullet was fired & 130.032 \\ \hline
+    7 layers, 128 units & Bullet's direction and speed & 125.061 \\ \hline
+    7 layers, 128 units & Bullet's speed & 127.677 \\ \hline
+    7 layers, 128 units & Only if bullet was fired & 123.777 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results with observation comparasion}
+    \label{shoot_moving_targets_table:2}
+\end{table}
+
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_bar_chart.eps}
+        \caption{Training results for all network configurations}
+        \label{train_results_shoot_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_obs_comparasion_bar_chart.eps}
+        \caption{Training results for all network configurations}
+        \label{train_results_shoot_obs_comparasion_bar_chart}
+    \end{center}
+\end{figure} 

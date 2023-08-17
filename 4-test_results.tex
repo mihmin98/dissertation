@@ -144,3 +144,69 @@ TODO: la moving target se atinge obiectivu de 100 de ori
         \label{test_results_moving_target_moving_brain_bar_chart}
     \end{center}
 \end{figure}
+
+
+\section{Shooting a moving target}
+
+TODO: la shooting target se impusca obiectivu de 100 de ori
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{15em} | m{15em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & 499.8927 \\ \hline
+    1 layer, 256 units & 564.696 \\ \hline
+    1 layer, 512 units & 536.6353 \\ \hline
+    3 layers, 128 units & 590.7621 \\ \hline
+    3 layers, 256 units & 637.085 \\ \hline
+    3 layers, 512 units & 736.3587 \\ \hline
+    5 layers, 128 units & 606.5751 \\ \hline
+    5 layers, 256 units & 675.0099 \\ \hline
+    5 layers, 512 units & 817.632 \\ \hline
+    7 layers, 128 units & 837.6456 \\ \hline
+    7 layers, 256 units & 872.1839 \\ \hline
+    7 layers, 512 units & 914.4853 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results}
+    \label{shoot_moving_targets_test_results:1}
+\end{table}
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{12em} | m{12em} | m{10em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Bullet Observations} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & Bullet's direction and speed & 528.1937 \\ \hline
+    1 layer, 128 units & Bullet's speed & 547.2708 \\ \hline
+    1 layer, 128 units & Only if bullet was fired & 499.8927 \\ \hline
+    3 layers, 128 units & Bullet's direction and speed & 529.0487 \\ \hline
+    3 layers, 128 units & Bullet's speed & 557.6132 \\ \hline
+    3 layers, 128 units & Only if bullet was fired & 590.7621 \\ \hline
+    5 layers, 128 units & Bullet's direction and speed & 628.6615 \\ \hline
+    5 layers, 128 units & Bullet's speed & 688.095 \\ \hline
+    5 layers, 128 units & Only if bullet was fired & 606.5751 \\ \hline
+    7 layers, 128 units & Bullet's direction and speed & 687.3325 \\ \hline
+    7 layers, 128 units & Bullet's speed & 684.9317 \\ \hline
+    7 layers, 128 units & Only if bullet was fired & 837.6456 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results with observation comparasion}
+    \label{shoot_moving_targets_test_results:2}
+\end{table}
+
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_test_bar_chart.eps}
+        \caption{Test results for shooting a moving target}
+        \label{test_results_shoot_moving_target_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_test_obs_comparasion_bar_chart.eps}
+        \caption{Test results for shooting a moving target based on bullet observations}
+        \label{test_results_shoot_moving_target_obs_comparasion_bar_chart}
+    \end{center}
+\end{figure}
