@@ -1,4 +1,4 @@
-\chapter{Training TODO: change name, kinda cringe}
+\chapter{Agent Implementations}
 \section{Reaching a static target}
 \subsection{The Problem} \label{static_target:the_problem}
 A common task for an AI in a game is to reach a a given destination. According to \cite{alonso2020deeplearningnavigation} the common way to achieve this goal is by using \emph{navigation meshes} (NavMeshes). These are represented as graphs, and their nodes represent surfaces that can be traversed. Afterwards, algorithms such as \emph{A*} can be used to find the fastest way for an agent to go from point A to point B. However, these \emph{NavMeshes} require to be \emph{baked} (TODO explicatie baked) in advance, so updating them in real time can prove to be a challenge depending on several factors such as:
@@ -302,7 +302,7 @@ Results for training the agent with 5 network layers and without the target's di
 \paragraph{}
 The second round of training is done by adding the target's movement direction to the agent's observations.
 
-The results for training the agent with a single network layer and without the target's direction obsrevation can be seen in Figure \ref{train_results_moving_1_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}.
+The results for training the agent with a single network layer and without the target's direction obsrevation can be seen in Figure \ref{train_results_moving_1_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. As in the previous cases, the best performed configuration during training is the one with the least units, i.e. 128 units. This one is better by $39.47\%$ than the configuration with 256 units, and by $6.88\%$ than the one with 512 units.
 
 \begin{figure}
     \begin{center}
@@ -312,6 +312,8 @@ The results for training the agent with a single network layer and without the t
     \end{center}
 \end{figure}
 
+Training the agent with a network with 3 layers obtains the results that can be seen in Figure \ref{train_results_moving_3_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. This time, all 3 configuration performed very similarily during training. The best configuration here was the one with 512 units which was better by $4.99\%$ than the one with 128 units, and by $7.37\%$ than the one with 256 units.
+
 \begin{figure}
     \begin{center}
         \includegraphics[width=0.95\linewidth]{move_to_moving_target_3_layers_with_dir.eps}
@@ -319,6 +321,8 @@ The results for training the agent with a single network layer and without the t
         \label{train_results_moving_3_layers_with_dir}
     \end{center}
 \end{figure}
+
+Results for training the agent with 5 network layers and without the target's direction obsrevation can be seen in Figure \ref{train_results_moving_5_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. It can be observed that the configuration with 128 units outperforms the other two during training, the ohter two performing mostly identically until the final training steps, where the one with 512 units slightly overtakes the one with 128 units. The configuration with 512 units is better by $1.26\%$ than the one with 128 units and better by $17.93\%$ than the one with 256 units.
 
 \begin{figure}
     \begin{center}
@@ -329,6 +333,10 @@ The results for training the agent with a single network layer and without the t
 \end{figure}
 
 
+\paragraph{}
+Looking at the final results in Figure \ref{train_results_moving_bar_chart} and Table \ref{move_to_moving_targets_table:1} we can observe that the best netowrk configurations have either 128 units per layer or 512 units per layer. When increasing the number of layers and not using the target's movement direction as an observation, the agent's performance slightly decreased during the training. Adding the target's movement direction as an observation increases the performance of the agent, compared to the configuration with the same number of layers and without this observation. 
+
+In conclusion, from these training results, it seems that adding the target's moving direction to the observations improves the agent's performance, the best results are achieved with either 128 or 512 units per hidden layer, and the best number of hidden layers is 3. The difference between using 128 units instead of 512 is a $\sim5\%$ decline in the agent's performance. If there are no reasons to reduce resource usage, the configuration with 3 hidden layers and 512 units per layer should be used.
 
 \begin{table}
     \centering
@@ -376,17 +384,100 @@ The results for training the agent with a single network layer and without the t
 
 \subsection{The Problem}
 
-
+Another common use of AIs in gaming is to provide an opponent for the player, in this case to fight against. This brings a whole new dimension to the problem besides having the AI move in the given worldspace. (TODO: more research pe cacatu asta)
 
 \subsection{Implementing the solution}
 
+The implementation builds on what was described in Sections \ref{static_target:implementation} and \ref{moving_target:implementation}. The addition is that the agent does not need to reach a certain target, but to shoot it. For this, several aspects need to be changed to implement the bullet logic.
 
+\paragraph{}
+For starters, the agent's action space was increased from 2 branches to 4 branches. The first 2 branches will still handle the agent's movement, the third branch can have two values: 0 or 1, and this tells the agent if he should fire a bullet, and the fourth branch sets the bullet's shooting force, which can have 3 values: low, medium, or high.
+
+\paragraph{}
+Another change that was made, was adding new observations, most of them being related to the bullet. The first one is a flag that tells if the bullet is fired. The second one is the bullet's trajectory, which can be used by the agent to learn to shoot on target. The third observation is about the bullet's speed so that the agent can learn with what force the bullet has been shot. The final new observation, which is not related to the bullet, is the angle between the target's front vector and the vector from the target to the agent. This is used so that the agent can learn when it is in the target's crosshairs, and to possibly learn how to flank the target. 
+
+In summary, the following observations have been added:
+\begin{itemize}
+    \item bullet is fired or not
+    \item bullet's trajectory vector
+    \item bullet's speed
+    \item angle between the target's front vector and vector from target to the agent
+\end{itemize}
+
+
+\paragraph{}
+Finally, new rewards and punishments were implemented. Firstly, the agent is no longer rewarded if it touches the target, it has to hit it with a bullet. To incentivise firing a bullet, a small reward is received when firing a bullet. Also, a penalty is added if the bullet misses the target, and disappears because it has travelled a certain distance, or it hit an environmental object. The other bullet reward that was added is a reward that is based on the bullet's trajectory and how close it is to the optimal trajectory to the target and is scaled by the distance from the bullet to the target, with the reward increasing the closer the bullet gets to the target. This reward is defined using Formula \ref{bullet:1}:
+
+\begin{equation} \label{bullet:1}
+    R = \frac{(1 - \frac{\alpha}{180}) \cdot r}{d} \cdot 2
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$\alpha$]: is the angle between the bullet's current trajectory and the optimal trajectory
+    \item [$r$]: is the reward that is obtained if the bullet has the optimal trajectory
+    \item [$d$]: is the distance from the bullet to the target
+\end{itemize}
+
+Two punishments were added to help the agent learn as if it were fighting a real opponent. The first one makes the agent stay at a given distance from the target, so that the agent will not try to stay glued to the target while trying to shoot it. This punishment is computed using Fomrula \ref{punishment:shoot_1}:
+
+\begin{equation} \label{punishment:shoot_1}
+    R = \begin{cases}
+        \frac{d - d'}{50} \cdot p & \text{for } d \geq d' \\
+        \frac{p}{d} & \text{else}
+    \end{cases}
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$d$]: is the distance from the agent to the target, that is clamped in the interval $[0, 50]$
+    \item [$d'$]: is the desired distance from the agent to the target
+    \item [$p$]: is the penalty for the agent not being at desired distance $d'$ from the target
+\end{itemize}
+
+The second punishment is applied when the agent is in front of the target, which means that the target can attack it. This punishment is added to try and teach the agent that it should flank its target so that it can attack it while being safe from being shot at. The punishment is computed using Formula \ref{punishment:shoot_2}
+
+\begin{equation} \label{punishment:shoot_2}
+    R = (1 - \frac{\alpha}{180}) \cdot p
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$\alpha$]: is the angle between the target's forward vector and the vector from the target to the agent
+    \item [$p$]: is the penalty for being in front of the target
+\end{itemize}
+
+In addition to the rewards and penalties already being used, described in Table \ref{reward_punish_table:1}, the new ones have the following values:
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{15em} | m{4em} | m{15em} ||}
+    \hline \hline
+    \strong{Name} & \strong{Value} & \strong{Notes} \\ \hline \hline
+    Shoot Target Reward & 10 &  \\ \hline
+    Fire Bullet Reward & 0.1 & \\ \hline
+    Bullet's Trajectory is Optimal Reward & 0.001 & is scaled by the distance between bullet and target \\ \hline
+    Miss Target Penalty & -0.1 &  \\ \hline
+    Agent Not At Desired Distance Penalty & -0.005 & is scaled by the difference of the desired distance and distance between agent and object \\ \hline
+    Agent In Front Of Target Penalty & -0.05 & is scaled by the angle between the target's front vector and the vector from the target to the agent \\ \hline \hline
+    \end{tabular}
+    \caption{New Rewards and Penalites for agent that is shooting a moving target}
+    \label{reward_punish_table:2}
+\end{table}
 
 
 \subsection{Training}
 
+The agent's training was done in 2 ways: a naive way, where the agent is only rewarded if it manages to shoot the target, without regards with its positioning, and a more \emph{tactical} way where the agent is punished for not keeping distance between it and the target, and also for being in front of the target. These two approaches are documented at \ref{subsubsection:shoot_naive} and \ref{subsubsection:shoot_tactical} respectively.
 
+\subsubsection{Naive approach} \label{subsubsection:shoot_naive}
 
+As mentioned above, this approach only cares about the agent shooting the target, and not necessarily about the agent's positioning in relation to the target. This means that the penalties described in Formulae \ref{punishment:shoot_1} and \ref{punishment:shoot_2} are not applied. However, the reward concerning the bullet's trajectory described in Formula \ref{bullet:1} is used. The observations regarding the bullet (if the bullet is fired, the bullet's trajectory vector and its speed) are used, while the observation regarding the angle between the target's front vector and vector from target to the agent is unused.
+
+It is also worth noting that during the first trainings, the only observation regarding the bullet that was used is the one that tells if the bullet is fired.
+
+\paragraph{}
+Results for training the agent with a single network layer can be seen in Figure \ref{train_results_shoot_1_layers} and Table \ref{shoot_moving_targets_table:1}. As with the previous agents, the best performing configuration during training is the one with 128 units per layer, while the other two lag behind it. The configuration with 128 units was better by $32.12\%$ than the one with 256 units, and better by $10\%$ than the one with 512 units.
 
 \begin{figure}
     \begin{center}
@@ -396,6 +487,8 @@ The results for training the agent with a single network layer and without the t
     \end{center}
 \end{figure}
 
+The results for training the agent with 3 network layers are in Figure \ref{train_results_shoot_3_layers} and Table \ref{shoot_moving_targets_table:1}. Here, the configuration with 128 units clearly overtakes the other two during most of the training process. The configuration with 128 units was better by $16.75\%$ than the one with 256 units, and better by $41.25\%$ than the one with 512 units at the end of the training.
+
 \begin{figure}
     \begin{center}
         \includegraphics[width=0.95\linewidth]{shoot_moving_target_3_layers.eps}
@@ -403,6 +496,8 @@ The results for training the agent with a single network layer and without the t
         \label{train_results_shoot_3_layers}
     \end{center}
 \end{figure}
+
+Training the agent with a network with 5 layers obtains the results that can be seen in Figure \ref{train_results_shoot_5_layers} and Table \ref{shoot_moving_targets_table:1}. The situation is similar to the previous ones, meaning that the configuration with 128 units still performs the best. It is better by $1.76\%$ than the one with 256 units and better by $29.38\%$ than the one with 512 units per layer.
 
 \begin{figure}
     \begin{center}
@@ -412,6 +507,8 @@ The results for training the agent with a single network layer and without the t
     \end{center}
 \end{figure}
 
+Results for training the agent with 7 network layers can be seen in Figure \ref{train_results_shoot_7_layers} and Table \ref{shoot_moving_targets_table:1}. Again, as in the previous cases, the configuration with the smallest number of units per layer performs better than the other ones during training. The configuration with 128 units performs better by $10.76\%$ than the one with 256 units, and better by $29.09\%$ than the one with 512 units per layer.
+
 \begin{figure}
     \begin{center}
         \includegraphics[width=0.95\linewidth]{shoot_moving_target_7_layers.eps}
@@ -420,40 +517,7 @@ The results for training the agent with a single network layer and without the t
     \end{center}
 \end{figure}
 
-
-
-\begin{figure}
-    \begin{center}
-        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_1_layers.eps}
-        \caption{Training results for shooting a moving target with a network with 1 hidden layer, 128 units, and different observations}
-        \label{train_results_shoot_obs_comparasion_1_layers}
-    \end{center}
-\end{figure}
-
-\begin{figure}
-    \begin{center}
-        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_3_layers.eps}
-        \caption{Training results for shooting a moving target with a network with 3 hidden layers, 128 units, and different observations}
-        \label{train_results_shoot_obs_comparasion_3_layers}
-    \end{center}
-\end{figure}
-
-\begin{figure}
-    \begin{center}
-        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_5_layers.eps}
-        \caption{Training results for shooting a moving target with a network with 3 hidden layers, 128 units, and different observations}
-        \label{train_results_shoot_obs_comparasion_5_layers}
-    \end{center}
-\end{figure}
-
-\begin{figure}
-    \begin{center}
-        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_7_layers.eps}
-        \caption{Training results for shooting a moving target with a network with 3 hidden layers, 128 units, and different observations}
-        \label{train_results_shoot_obs_comparasion_7_layers}
-    \end{center}
-\end{figure}
-
+The final results for all configurations can be seen in Figure \ref{train_results_shoot_bar_chart} and Table \ref{shoot_moving_targets_table:1}. From here we can deduce that using a smaller network with fewer units per layer gives the best results during training. Increasing the number of layers decreased the performance of the agent in every single case by up to $\sim40\%$. Thus, it can be clearly infered that using a network architecture with 1 layer and 128 units per layer should give the best performance of the agent, and also use the least amount of computing resources.
 
 \begin{table}
     \centering
@@ -477,29 +541,6 @@ The results for training the agent with a single network layer and without the t
     \label{shoot_moving_targets_table:1}
 \end{table}
 
-\begin{table}
-    \centering
-    \begin{tabular}{|| m{12em} | m{12em} | m{10em} ||}
-    \hline \hline
-    \strong{Network Configuration} & \strong{Bullet Observations} & \strong{Final Mean Reward} \\ \hline \hline
-    1 layer, 128 units & Bullet's direction and speed & 156.766 \\ \hline
-    1 layer, 128 units & Bullet's speed & 166.427 \\ \hline
-    1 layer, 128 units & Only if bullet was fired & 183.278 \\ \hline
-    3 layers, 128 units & Bullet's direction and speed & 152.188 \\ \hline
-    3 layers, 128 units & Bullet's speed & 163.311 \\ \hline
-    3 layers, 128 units & Only if bullet was fired & 162.629 \\ \hline
-    5 layers, 128 units & Bullet's direction and speed & 153.46 \\ \hline
-    5 layers, 128 units & Bullet's speed & 137.391 \\ \hline
-    5 layers, 128 units & Only if bullet was fired & 130.032 \\ \hline
-    7 layers, 128 units & Bullet's direction and speed & 125.061 \\ \hline
-    7 layers, 128 units & Bullet's speed & 127.677 \\ \hline
-    7 layers, 128 units & Only if bullet was fired & 123.777 \\ \hline \hline
-    \end{tabular}
-    \caption{Final training results for shooting a moving target with different bullet observations}
-    \label{shoot_moving_targets_table:2}
-\end{table}
-
-
 \begin{figure}
     \begin{center}
         \includegraphics[width=\linewidth]{shoot_moving_target_bar_chart.eps}
@@ -508,6 +549,74 @@ The results for training the agent with a single network layer and without the t
     \end{center}
 \end{figure}
 
+\paragraph{}
+In the second part of the trainings, the agent is trained using a configuration of 128 units per network layer, since this yielded the best results in the previous phase, and different observations regarding the bullet. The first observation combination uses all three bullet observations: if the bullet is fired, its trajectory vector and its speed; the second observation combination contains only two bullet observations: the bullet's speed and if the bullet is fired; and the final combination contains only the observation that tells if the bullet was fired. This comparasion is made to see if adding more observations would increase the agent's performance, or decrease it, similar to what happened when adding the target's movement direction to the observations in Section \ref{moving_target:training}.
+
+Results for training the agent with a single network layer can be seen in Figure \ref{train_results_shoot_obs_comparasion_1_layers} and Table \ref{shoot_moving_targets_table:2}. All 3 observation combinations yield very similar results, with the variant that observes only if the bullet is fired being slightly better then the other two. It is better by $16.91\%$ than the observation combination with both bullet trajectory and speed, and better by $10.12\%$ than the combination with the bullet's speed.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_1_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 1 hidden layer, 128 units, and different observations}
+        \label{train_results_shoot_obs_comparasion_1_layers}
+    \end{center}
+\end{figure}
+
+The results for training the agent with 3 network layers are in Figure \ref{train_results_shoot_obs_comparasion_3_layers} and Table \ref{shoot_moving_targets_table:2}. Here, it is similar to the previous situation, with all 3 combinations achieving similar training results. Here, the combination with the bullet's speed is the best one, being better by $0.41\%$ than the combination that observes only if the bullet is fired, which means these two combinations obtain virtually identical results, and better by $7.3\%$ than the combination with both bullet trajectory and speed.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_3_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 3 hidden layers, 128 units, and different observations}
+        \label{train_results_shoot_obs_comparasion_3_layers}
+    \end{center}
+\end{figure}
+
+Training the agent with a network with 5 layers obtains the results that can be seen in Figure \ref{train_results_shoot_obs_comparasion_5_layers} and Table \ref{shoot_moving_targets_table:2}. Again, training results are very similar for all 3 combinations. Here, the best one is the combination with both bullet trajectory and speed being better by $11.69\%$ than the combination with the bullet's speed, and better by $18.01\%$ the the one that only observes if the bullet was fired.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_5_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 5 hidden layers, 128 units, and different observations}
+        \label{train_results_shoot_obs_comparasion_5_layers}
+    \end{center}
+\end{figure}
+
+Results for training the agent with 7 network layers can be seen in Figure \ref{train_results_shoot_obs_comparasion_7_layers} and Table \ref{shoot_moving_targets_table:2}. All 3 combinations perform virtually identically having a maximum difference in agent performance of $\sim3\%$.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_128_7_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 7 hidden layers, 128 units, and different observations}
+        \label{train_results_shoot_obs_comparasion_7_layers}
+    \end{center}
+\end{figure}
+
+
+The final results for all configurations can be seen in Figure \ref{train_results_shoot_obs_comparasion_bar_chart} and Table \ref{shoot_moving_targets_table:2}. As with the first training stage, increasing the number of layers leads to a poorer performing agent. Also, there were no huge differences when introducing the new bullet observations, with the new observation combinations performing the same or slightly worse then when observing only if the bullet was fired. The only exception is when using a network with 5 layers, where adding the bullet's trajectory and speed to the observations obtains a performance that is $18.01\%$ better than if not including them. However, the best performing configuration still remains the one with 1 layer, and where the only observation about the bullet is if it was fired.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{12em} | m{13em} | m{10em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Bullet Observations} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & Bullet's trajectory and speed & 156.766 \\ \hline
+    1 layer, 128 units & Bullet's speed & 166.427 \\ \hline
+    1 layer, 128 units & Only if bullet was fired & 183.278 \\ \hline
+    3 layers, 128 units & Bullet's trajectory and speed & 152.188 \\ \hline
+    3 layers, 128 units & Bullet's speed & 163.311 \\ \hline
+    3 layers, 128 units & Only if bullet was fired & 162.629 \\ \hline
+    5 layers, 128 units & Bullet's trajectory and speed & 153.46 \\ \hline
+    5 layers, 128 units & Bullet's speed & 137.391 \\ \hline
+    5 layers, 128 units & Only if bullet was fired & 130.032 \\ \hline
+    7 layers, 128 units & Bullet's trajectory and speed & 125.061 \\ \hline
+    7 layers, 128 units & Bullet's speed & 127.677 \\ \hline
+    7 layers, 128 units & Only if bullet was fired & 123.777 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results for shooting a moving target with different bullet observations}
+    \label{shoot_moving_targets_table:2}
+\end{table}
+
 \begin{figure}
     \begin{center}
         \includegraphics[width=\linewidth]{shoot_moving_target_obs_comparasion_bar_chart.eps}
@@ -515,3 +624,11 @@ The results for training the agent with a single network layer and without the t
         \label{train_results_shoot_obs_comparasion_bar_chart}
     \end{center}
 \end{figure} 
+
+
+\paragraph{}
+TODO: concluzie
+
+\subsubsection{Tactical approach} \label{subsubsection:shoot_tactical}
+
+This approach 
