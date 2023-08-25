@@ -627,8 +627,9 @@ The final results for all configurations can be seen in Figure \ref{train_result
 
 
 \paragraph{}
-TODO: concluzie
+In conclusion, when comparing the two approaches of adding or not multiple bullet observations, it seems that the best results are obtained when observing only if the bullet was fired. When the number of layers increseas, it looks like there is a tendency to obtain better results when adding more bullet observations. However, these results are still worse than when using a network architecture with 1 hidden layer, 128 units per layer, and the only bullet observation is if it was fired.
+
 
 \subsubsection{Tactical approach} \label{subsubsection:shoot_tactical}
 
-This approach 
+This approach tries to mimic a more realistic fighting scenario, where the target would shoot back at the agent. Thus, through the newly added punishments, described in Formulae \ref{punishment:shoot_1} and \ref{punishment:shoot_2}, the agent should learn to keep a certain distance from the target, and also to flank it. Here, the only bullet observation that is made, is if the bullet was fired or not. This decision was made based on the training results obtained when training the agent in a more \emph{naive} way, in the above experiment. Also, introducing more observations would require the agent to train for a larger number of steps to efficiently use them, if possible, and since the number of training steps still remains $10^7$, and new penalties were added, this would lead to a poorer performing agent.
