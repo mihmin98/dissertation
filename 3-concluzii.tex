@@ -1,7 +1,7 @@
 \chapter{Agent Implementations}
 \section{Reaching a static target}
 \subsection{The Problem} \label{static_target:the_problem}
-A common task for an AI in a game is to reach a a given destination. According to \cite{alonso2020deeplearningnavigation} the common way to achieve this goal is by using \emph{navigation meshes} (NavMeshes). These are represented as graphs, and their nodes represent surfaces that can be traversed. Afterwards, algorithms such as \emph{A*} can be used to find the fastest way for an agent to go from point A to point B. However, these \emph{NavMeshes} require to be \emph{baked} (TODO explicatie baked) in advance, so updating them in real time can prove to be a challenge depending on several factors such as:
+A common task for an AI in a game is to reach a a given destination. According to \cite{alonso2020deeplearningnavigation} the common way to achieve this goal is by using \emph{navigation meshes} (NavMeshes). These are represented as graphs, and their nodes represent surfaces that can be traversed. Afterwards, algorithms such as \emph{A*} can be used to find the fastest way for an agent to go from point A to point B. However, these \emph{NavMeshes} require to be \emph{baked} (TODO explicatie baked vezi \cite{alonso2020deeplearningnavigation}) in advance, so updating them in real time can prove to be a challenge depending on several factors such as:
 \begin{itemize}
     \item the game engine used
     \item the complexity of the game environment
@@ -15,7 +15,7 @@ A proposed solution for this problem would be to use AI agents that have been tr
 First, the action space for the agent is defined: due to the fact that we only need to move the agent to a given position, the action space consists of moving the agent forward or backward, and rotating it. Because the agent is supposed to be controlled by a controller, its movement input is defined as a real number in the $[-1, 1]$ interval for both $X$ and $Y$ axes. However, a discrete action space will be used instead of a continuous one to reduce the difficulty of learning, and also because there is no need for the agent to have movements that are so precise. For each axis the action space will be represented by the discrete space: $\{-1, -0.5, 0, 0.5, 1\}$.
 
 \paragraph{}
-To make decisions, the agent will need to make several observations about its surroundings. Firstly, it will need to know how close it is to certain objects in the environment. To accomplish this, several \emph{raycasts} will be used to measure the distance from the agent, similar to a \emph{LIDAR} (TODO: add ceva despre lidar si un paper). The raycasts start from the center of the agent and are spread in such a way that the angle between 2 consecutive rays is equal for any 2 consecutive rays (TODO: imagine cu rays, si probabil sa gasesc un termen mai ok). The observation will contain the distance until the rays hit an object. Also, the index of the layer of the hit object will be included in the observations, so that the agent will differentiate between regular environment objects and more important objects, such as other players, enemies, etc. For this implementation, 32 rays were used.
+To make decisions, the agent will need to make several observations about its surroundings. Firstly, it will need to know how close it is to certain objects in the environment. To accomplish this, several \emph{raycasts} will be used to measure the distance from the agent, similar to a \emph{LIDAR} (TODO: add ceva despre lidar si un paper https://oceanservice.noaa.gov/facts/lidar.html). The raycasts start from the center of the agent and are spread in such a way that the angle between 2 consecutive rays is equal for any 2 consecutive rays (TODO: imagine cu rays, si probabil sa gasesc un termen mai ok). The observation will contain the distance until the rays hit an object. Also, the index of the layer of the hit object will be included in the observations, so that the agent will differentiate between regular environment objects and more important objects, such as other players, enemies, etc. For this implementation, 32 rays were used.
 
 Other observations that are made are the agent's position in space and also that of the target. This observation is included so that the agent can learn how movement brings it closer or further to the target. The next observation is the agent's forward vector so it can know in which direction it is moving. The optimal direction that the agent should take is also observed and obtained by computing the vector difference between the target's position and the agent's position. To know how much to adjust its trajectory, the angle between the agent's forward vector and the target is observed; the angle is signed so that the agent can learn to adjust its trajectory to the left or to the right. The distance to the target is added to the observations so that the agent can learn that when the distance is getting smaller it is rewarded. The agent's normalized velocity vector is observed to show in which direction it is moving based on the given input. The angle between the agent's velocity vector and its forward vector is observed to tell if the agent is moving forwards or backwards. Finally, the agent's velocity magnitude is observed so the agent can know if it is moving or standing still. 
 
@@ -632,4 +632,79 @@ In conclusion, when comparing the two approaches of adding or not multiple bulle
 
 \subsubsection{Tactical approach} \label{subsubsection:shoot_tactical}
 
-This approach tries to mimic a more realistic fighting scenario, where the target would shoot back at the agent. Thus, through the newly added punishments, described in Formulae \ref{punishment:shoot_1} and \ref{punishment:shoot_2}, the agent should learn to keep a certain distance from the target, and also to flank it. Here, the only bullet observation that is made, is if the bullet was fired or not. This decision was made based on the training results obtained when training the agent in a more \emph{naive} way, in the above experiment. Also, introducing more observations would require the agent to train for a larger number of steps to efficiently use them, if possible, and since the number of training steps still remains $10^7$, and new penalties were added, this would lead to a poorer performing agent.
+This approach tries to mimic a more realistic fighting scenario, where the target would shoot back at the agent. Thus, through the newly added punishments, described in Formulae \ref{punishment:shoot_1} and \ref{punishment:shoot_2}, the agent should learn to keep a certain distance from the target, and also to flank it. Here, the only bullet observation that is made, is if the bullet was fired or not. This decision was made based on the training results obtained when training the agent in a more \emph{naive} way, in the above experiment. Also, introducing more observations would require the agent to train for a larger number of steps to efficiently use them, if possible, and since the number of training steps still remains $10^7$, and new penalties were added, this would lead to a poorer performing agent. 
+
+\paragraph{}
+Results for training the agent with a single network layer can be seen in Figure \ref{train_results_shoot_v2_1_layers} and Table \ref{shoot_moving_targets_v2_table:1}. The configurations with 256 and 512 units per layer had similar perofrmances during the training, however the one with 128 units began to fall behind these two at around $6 \cdot 10^6$ steps. The best performing configuration was the one with 256 units.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_v2_1_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 1 hidden layer}
+        \label{train_results_shoot_v2_1_layers}
+    \end{center}
+\end{figure}
+
+The results for training the agent with 3 network layers are in Figure \ref{train_results_shoot_v2_3_layers} and Table \ref{shoot_moving_targets_v2_table:1}. The configurations with 128 and 256 units per layer performed virtually identically during the training, with the best one being the configuration with 128 units, while the one with 512 units managed to fall behind them from the beginning.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_v2_3_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 3 hidden layers}
+        \label{train_results_shoot_v2_3_layers}
+    \end{center}
+\end{figure}
+
+Results for training the agent with 5 network layers can be seen in Figure \ref{train_results_shoot_v2_5_layers} and Table \ref{shoot_moving_targets_v2_table:1}. During the training, the configuration with 128 units per layer performs better than the one with 256 units, while the one with 512 falls behind these two by a large amount.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_v2_5_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 5 hidden layers}
+        \label{train_results_shoot_v2_5_layers}
+    \end{center}
+\end{figure}
+
+Training the agent with a network with 5 layers obtains the results that can be seen in Figure \ref{train_results_shoot_v2_7_layers} and Table \ref{shoot_moving_targets_v2_table:1}. The results are similar to the ones obtained with an architecture with 5 hidden layers with the configuration with 128 units per layer performing better than the one with 256 units, and the one with 512 units greatly falling behind these two.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{shoot_moving_target_v2_7_layers.eps}
+        \caption{Training results for shooting a moving target with a network with 7 hidden layers}
+        \label{train_results_shoot_v2_7_layers}
+    \end{center}
+\end{figure}
+
+
+\paragraph{}
+In summary, for this type of agent, a smaller network architecture should be used, since it obtains better results, with networks with over 3 hidden layers having a heavily readuced performance. Also, configurations with over 128 units per layer should be used, since the ones with 128 units perform worse in comparasion to the others, but only when the number of hidden layers is small.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{15em} | m{15em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Final Mean Reward} \\ \hline \hline
+    1 layer, 128 units & -4.727 \\ \hline
+    1 layer, 256 units & 40.452 \\ \hline
+    1 layer, 512 units & 25.225 \\ \hline
+    3 layers, 128 units & 8.479 \\ \hline
+    3 layers, 256 units & 13.789 \\ \hline
+    3 layers, 512 units & -27.845 \\ \hline
+    5 layers, 128 units & -8.788 \\ \hline
+    5 layers, 256 units & -25.076 \\ \hline
+    5 layers, 512 units & -96.232 \\ \hline
+    7 layers, 128 units & -16.319 \\ \hline
+    7 layers, 256 units & -48.976 \\ \hline
+    7 layers, 512 units & -107.791 \\ \hline \hline
+    \end{tabular}
+    \caption{Final training results for shooting a moving target}
+    \label{shoot_moving_targets_v2_table:1}
+\end{table}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_v2_bar_chart.eps}
+        \caption{Training results for all network configurations for shooting a moving target}
+        \label{train_results_shoot_v2_bar_chart}
+    \end{center}
+\end{figure}

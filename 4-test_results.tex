@@ -222,6 +222,17 @@ For shooting a moving target, the test is built just like it is described in Sec
 
 \subsection{Agent trained in a \emph{naive} manner}
 
+For the \emph{naive} approach, the results can be seen in Table \ref{shoot_moving_targets_test_results:1} and Figure \ref{test_results_shoot_moving_target_bar_chart}. The architecture with a single hidden layer obtained the best results with the configuration that has 128 units per layer obtaining the best result, which is 499.8927 seconds. The configuration with 256 units was slower by 64.8033 seconds ($12.96\%$), while the one with 512 units per layer was slower by 36.7426 seconds ($7.35\%$).
+
+For the architecture with 3 hidden layers, the configuration 128 units per layer was agian the fastest one, managing to finish the test in 590.7621 seconds, however it was slower than any of the configurations with a single hidden layer. The configuration with 256 units was slower by 46.3229 seconds ($7.84\%$), while the one with 512 units was slower by 145.5966 seconds ($24.64\%$) which is a significant increase.
+
+Looking at the results for the architecture with 5 hidden layers, it can be observed that, again, the best configuration is the one with 128 units per layer, with a time of 606.5751 seconds. The configuration with 256 units was slower by 68.4348 seconds ($11.28\%$), while the configuration with 512 units was slower by 211.0569 seconds ($34.79\%$), which is a big increase in the time to finish the test.
+
+The architecture with 7 layers, has the slowest results out of all the architectures, with the configuration with 128 units per layer obtaining a time of 837.6456 seconds, which is slower than any of the other architectures. The configuration with 256 units per layer is slower by 34.5383 seconds ($4.12\%$), while the one with 512 units is slower by 76.8397 seconds ($9.17\%$).
+
+\paragraph{}
+In summary, the fastest architectures were the ones that had only 128 units per layer, with the fastest one being the one with a single hidden layer and which finished the test in 499.8927 seconds. The slowest architectures were the ones with 512 units per layer, with the slowest one being the one with 7 hidden layer and which finished the test in 914.4853 seconds, taking almost twice as much time as the fastest agent. It is worth noting that increasing the number of hidden layers and also the number of units per layer, is alost guaranteed to decrease the performance of the agent.
+
 \begin{table}
     \centering
     \begin{tabular}{|| m{15em} | m{15em} ||}
@@ -243,6 +254,35 @@ For shooting a moving target, the test is built just like it is described in Sec
     \caption{Test results for shooting a moving target using agent that was trained using \emph{naive} method}
     \label{shoot_moving_targets_test_results:1}
 \end{table}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_test_bar_chart.eps}
+        \caption{Test results for shooting a moving target using agent that was trained using \emph{naive} method}
+        \label{test_results_shoot_moving_target_bar_chart}
+    \end{center}
+\end{figure}
+
+
+
+\paragraph{}
+Just like in Section \ref{subsubsection:shoot_naive}, there will be a comparasion between the results obtained when changing the bullet observations. Each agent will have an architecture with a certain number of hidden layers and 128 units per layer. The observation combinations are the following:
+\begin{itemize}
+    \item Bullet's trajectory and speed, and if the bullet was fired
+    \item Bullet's speed and if the bullet was fired
+    \item Only if the bullet was fired
+\end{itemize}
+
+The test results can be seen in Table \ref{shoot_moving_targets_test_results:2} and Figure \ref{test_results_shoot_moving_target_obs_comparasion_bar_chart}. For the architecture with a single hidden layer, the fastest resultis obtained by the agent that observers only if the bullet was fired, finishing the test in 499.8927 seconds. In the second place is the agent that makes all three observations about the bullet, being slower by 28.301 seconds ($5.66\%$), and in the third place is the agent that makes two observations about the bullet, and it's slower by 47.3781 seconds ($9.47\%$).
+
+For the architecture with 3 hidden layers, the fastest agent is the one that makes all thee observations regarding the bullet, and finishes the test in 529.0487 seconds, almost identical to the performance achieved by the same type of agent, but with a network with a single hidden layer. It is followed by the agent that make two observations regarding the bullet, being slower by 28.5645 seconds ($5.39\%$), and finally, by the agent that only observes if the bullet is fired, being slower by 61.7134 seconds ($11.66\%$).
+
+The architecture with 5 hidden layers, again, has the the fastest agent being the one that observes only if the bullet was fired, and the agent finishes the test in 606.5751 seconds. It is closely followed by the agent that used all three bullet observations, being slower by 22.0864 seconds ($3.64\%$), and then by the agent with two bullet observations, which was slower by 81.5199 seconds ($13.43\%$).
+
+Looking at the results for the architecture with 7 hidden layers, the agents that had 2 or 3 observations regarding the bullet performed virtually identically, having a difference of only 2.4008 seconds, while the agent that observed only if the bullet was fired was slower by 152.7139 seconds ($22.29\%$).
+
+\paragraph{}
+In summary, it can be seen that increasing the number of layers also makes the agent perfrom more poorly, with the agents that had a network architecture witha  single hidden layer performing the best. It can aslo be observed that when the number of layers is lower, it is best not to include additional observations regarding the bullet and only keep the one that tells if the bullet was fired.
 
 \begin{table}
     \centering
@@ -266,15 +306,6 @@ For shooting a moving target, the test is built just like it is described in Sec
     \label{shoot_moving_targets_test_results:2}
 \end{table}
 
-
-\begin{figure}
-    \begin{center}
-        \includegraphics[width=\linewidth]{shoot_moving_target_test_bar_chart.eps}
-        \caption{Test results for shooting a moving target using agent that was trained using \emph{naive} method}
-        \label{test_results_shoot_moving_target_bar_chart}
-    \end{center}
-\end{figure}
-
 \begin{figure}
     \begin{center}
         \includegraphics[width=\linewidth]{shoot_moving_target_test_obs_comparasion_bar_chart.eps}
@@ -285,6 +316,38 @@ For shooting a moving target, the test is built just like it is described in Sec
 
 
 \subsection{Agent trained in a tactical manner}
+
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{15em} | m{15em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Time to complete ($s$)} \\ \hline \hline
+    1 layer, 128 units & 605.0273 \\ \hline
+    1 layer, 256 units & 483.9203 \\ \hline
+    1 layer, 512 units & 494.5686 \\ \hline
+    3 layers, 128 units & 590.4073 \\ \hline
+    3 layers, 256 units & 679.4313 \\ \hline
+    3 layers, 512 units & 762.0126 \\ \hline
+    5 layers, 128 units & 650.9454 \\ \hline
+    5 layers, 256 units & 701.7521 \\ \hline
+    5 layers, 512 units & 1528.791 \\ \hline
+    7 layers, 128 units & 687.3971 \\ \hline
+    7 layers, 256 units & 937.4277 \\ \hline
+    7 layers, 512 units & 2200.825 \\ \hline \hline
+    \end{tabular}
+    \caption{Test results for shooting a moving target using agent that was trained using tactical method}
+    \label{shoot_moving_targets_v2_test_results:1}
+\end{table}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=\linewidth]{shoot_moving_target_v2_test_bar_chart.eps}
+        \caption{Test results for shooting a moving target using agent that was trained using tactical method}
+        \label{test_results_shoot_moving_target_v2_bar_chart}
+    \end{center}
+\end{figure}
+
 
 \section{Fighting against an AI controlled enemy}
 
