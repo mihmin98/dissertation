@@ -273,7 +273,7 @@ Just like in Section \ref{subsubsection:shoot_naive}, there will be a comparasio
     \item Only if the bullet was fired
 \end{itemize}
 
-The test results can be seen in Table \ref{shoot_moving_targets_test_results:2} and Figure \ref{test_results_shoot_moving_target_obs_comparasion_bar_chart}. For the architecture with a single hidden layer, the fastest resultis obtained by the agent that observers only if the bullet was fired, finishing the test in 499.8927 seconds. In the second place is the agent that makes all three observations about the bullet, being slower by 28.301 seconds ($5.66\%$), and in the third place is the agent that makes two observations about the bullet, and it's slower by 47.3781 seconds ($9.47\%$).
+The test results can be seen in Table \ref{shoot_moving_targets_test_results:2} and Figure \ref{test_results_shoot_moving_target_obs_comparasion_bar_chart}. For the architecture with a single hidden layer, the fastest result is obtained by the agent that observers only if the bullet was fired, finishing the test in 499.8927 seconds. In the second place is the agent that makes all three observations about the bullet, being slower by 28.301 seconds ($5.66\%$), and in the third place is the agent that makes two observations about the bullet, and it's slower by 47.3781 seconds ($9.47\%$).
 
 For the architecture with 3 hidden layers, the fastest agent is the one that makes all thee observations regarding the bullet, and finishes the test in 529.0487 seconds, almost identical to the performance achieved by the same type of agent, but with a network with a single hidden layer. It is followed by the agent that make two observations regarding the bullet, being slower by 28.5645 seconds ($5.39\%$), and finally, by the agent that only observes if the bullet is fired, being slower by 61.7134 seconds ($11.66\%$).
 
@@ -315,8 +315,18 @@ In summary, it can be seen that increasing the number of layers also makes the a
 \end{figure}
 
 
-\subsection{Agent trained in a tactical manner}
+\subsection{Agent trained in a tactical manner} \label{shoot_moving_target_tactical_subsection}
 
+Test results for the agent that was trained to shoot a target in a more tactical manner can be seen in Table \ref{shoot_moving_targets_v2_test_results:1} and Figure \ref{test_results_shoot_moving_target_v2_bar_chart}. For the architecture with a single hidden layer, the best results are obtained by the agents with a  configuration of 256 and 512 units per layer, with the oen with 256 units being the fastest, obtaining a time of 483.9203 seconds. The configuration with 512 units was slower by 10.6483 seconds ($2.2\%$), while the configuration wih 128 units was slower by 121.107 seconds ($25.02\%$).
+
+The architecture with 3 hidden layers has the fastest configuration being the one with 128 units per layer, achieveing a time of 590.4073 seconds. It is followed by the configuration with 256 units being slower by 89.024 seconds ($15.07\%$), and then by the configuration with 512 units being slower by 171.6053 seconds ($29.06\%$).
+
+For the architecture with 5 hidden layers, the fastest configuration is again the one with 128 units per layer which manages to finish the course in 650.9454 seconds. It is followed by the configuration with 256 units which is slower by 50.8067 seconds ($7.8\%$). The configuration with 512 units falls massively behind these two other configurations, being slower than the one with 128 units by 877.8456 seconds ($134.85\%$), taking more than twice as much time to finish the test. This is due to the fact that the agent was not able to learn how to accurately shoot at the target, missing most of its shots.
+
+The architecture with 7 hidden layers, has the best configuration being the one with 128 units per layer, which manages to achieve a time of 687.3971 seconds. The configuration with 256 units takes the second place being slower by 250.0306 seconds ($36.37\%$). Just like the architecture with 5 hidden layers, here also, the configuration with 512 units is the slowest and greatly falls behind the other two, being slower by 1513.4279 ($220.16\%$) seconds than the configuration with 128 units, being more than 3 times slower than it. This also is due to the fact that the agent did not learn how to shoot properly, missing most of its shots.
+
+\paragraph{}
+In conclusion, in this test where it is measured how fast an agent can shoot a certain number of moving targets, even with the added tactical behaviour, the agents that had the network with the elast amount of hidden layers performed the best. It is worth noting that adding more units per layer for the architecture with a single hidden layer improved the agent's performance, while adding more units per layer with a network with nore hidden layers, severly impacted the agent's performance in a negative way. This could be due to the fact that the agents with a larger network needed more training steps due to the more complicated behaviour needed to be learned. Another thing worth noting, is that the agents did not seem to fully learn the added tactical behaviour of keeping a distance from the enemy and flanking it, instead opting to act more like the agents that were trained to shoot a target in a more \emph{naive} way. This could be due to the added punishment and reward values that were added, being not optimal.
 
 \begin{table}
     \centering
@@ -349,6 +359,160 @@ In summary, it can be seen that increasing the number of layers also makes the a
 \end{figure}
 
 
-\section{Fighting against an AI controlled enemy}
+\section{Fighting against an AI controlled enemy} \label{test_fight_tank}
 
-TODO: sa fac sa pot sa bat un tank, dupa sa vad daca paote sa bata inamicu, si daca da, sa vad cat de repede poa sa bata inamicu de x ori (eventual sa fac un mean time per round, sau sa zic de cate ori a fost lovit, etc)
+The final test is for the agent to fight against an AI controlled enemy and see if it can defeat it, and how well it can do that. The test consists of a 1v1 fight against an enemy tank on the same map where the agent was trained. The agent battles the enemy tank for 20 rounds. To win a round, a tank must hit it's enemy roughly 3 times to defeat it. Each round, the tanks start in randomized positions. The enemy AI is implemented using behavior trees and genetic algorithms, as described in \cite{paduraru2019automatic}. To measure the agent's performance, several metrics will be used, and these are:
+\begin{itemize}
+    \item how fast the agent finishes the test
+    \item how many of the 20 rounds the agent won
+    \item how many times the agent scored a hit on the enemy
+    \item how many times the agent was hit by the enemy
+\end{itemize}
+
+Just like in the previous section (Section \ref{test_shoot_moving_target}), both types of agents that can shoot a target will be tested: the agents trained in a \emph{naive} way, and the ones trained in a more tactical way.
+
+\subsection{Agent trained in a \emph{naive} manner}
+
+The first type of agent that is tested is the one trained in a naive way, which means its only goal is to shoot the target no matter what. This should lead to a more aggressive and reckless approach. Unlike the previous section, there will be no comparasions between different observations for the bullet, since it was seen that the best observation combination regarding the bullet was the one where it is observed only if the bullet is fired.
+
+\paragraph{}
+The test results can be seen in Table \ref{test_results_tank_fight_naive:table} and in Figures \ref{test_results_tank_fight_naive_time_bar_chart}, \ref{test_results_tank_fight_naive_rounds_won_bar_chart}, \ref{test_results_tank_fight_naive_times_hit_bar_chart} and \ref{test_results_tank_fight_naive_times_got_hit_bar_chart}.
+
+Looking at the results, it can be seen that the best network configuration is the one with 1 hidden layer and with 128 units per layer, since it manages to finish the test in a short time, similar to the other agents with 1 and 3 hidden layers, manages to have the maximum number of rounds won, 18, an manages to get hit the least out of all agents. Where it does not manage to win is the number of times it manages to hit the enemy, falling behind a few agents, but still managing to be ahead of most other agents. Despite not being trained specifically to have an advanced behaviour, it sometimes tries to run from the enemy so that it can flank it. The other agents that have a single hidden layer perform similar to the one that has 128 units per layer, however they managed to be hit by at least 7 more times by the enemy.
+
+For the agents with 3 hidden layers, the best performing one is also the one that has 128 units per layer, achieving results similar to the agent that has a network with a single hidden layer and 128 units per layer, being slightly worse than it due to the fact that it got hit more times by the enemy. The other 2 agents managed to finish the test with similar times, but won less rounds, did not hit the enemy as many times, and got hit by the enemy more.
+
+The agents with 5 hidden layers manage to be the ones who finish the test the slowest, with the worst offender being the agent with 256 units per layer due to the fact that it keeps running away from the enemy. These agents are also the ones that won the least amount of rounds, possibly due to the fact that they were the ones to be hit by the enemy the most out of all agents.
+
+Finally, the agents with 7 layers also have big completion times compared to the agents with 1 or 3 hidden layers, because they tend to run around the map. These agents with 7 hidden layers are also receiving more hits than the ones with 1 or 3 layers, however they manage to win more rounds than the agents with 5 layers. The agent with 128 units per layer manages to score the most hits on the enemy out of all the other agents.
+
+\paragraph{}
+In conclusion, it can be seen that using agents that have smaller network architectures, especially regarding the number of units per layer, perform better than the other ones. The approach taken by the agents in this test was one where they would just charge at the enemy and stay in front of it while shooting at every chance. A downside of this behaviour is that it's very predictable nad might not be as fun for a human player to go up against since it will, almost always, act the same way. Another problem would be that the agents did not have any \emph{trigger discipline}, meaning that they would shoot bullets even if they were not aimed at the enemy.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{11.5em} | m{5.5em} | m{4em} | m{5em} | m{6.5em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Time to complete ($s$)} & \strong{Rounds won} & \strong{Successful hits} & \strong{Hits received} \\ \hline \hline
+    1 layer, 128 units & 342.9979 & 18 & 58 & 26 \\ \hline
+    1 layer, 256 units & 342.3145 & 15 & 56 & 39 \\ \hline
+    1 layer, 512 units & 336.0863 & 18 & 60 & 33 \\ \hline
+    3 layers, 128 units & 327.6781 & 18 & 59 & 29 \\ \hline
+    3 layers, 256 units & 315.368 & 14 & 56 & 38 \\ \hline
+    3 layers, 512 units & 340.9718 & 14 & 53 & 32 \\ \hline
+    5 layers, 128 units & 363.3622 & 14 & 51 & 37 \\ \hline
+    5 layers, 256 units & 516.4233 & 13 & 52 & 40 \\ \hline
+    5 layers, 512 units & 428.2677 & 14 & 57 & 35 \\ \hline
+    7 layers, 128 units & 458.6925 & 16 & 62 & 34 \\ \hline
+    7 layers, 256 units & 425.0882 & 15 & 56 & 38 \\ \hline
+    7 layers, 512 units & 375.2268 & 15 & 54 & 32 \\ \hline \hline
+    \end{tabular}
+    \caption{Test results for fighting an AI controlled enemy using agent that was trained using \emph{naive} method}
+    \label{test_results_tank_fight_naive:table}
+\end{table}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_naive_time.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the time to finish the test}
+        \label{test_results_tank_fight_naive_time_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_naive_rounds_won.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the number of rounds the agent won}
+        \label{test_results_tank_fight_naive_rounds_won_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_naive_times_hit.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the number of times the agent hit the enemy}
+        \label{test_results_tank_fight_naive_times_hit_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_naive_times_got_hit.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the number of times the agent got hit by the enemy}
+        \label{test_results_tank_fight_naive_times_got_hit_bar_chart}
+    \end{center}
+\end{figure}
+
+
+
+\subsection{Agent trained in a tactical manner}
+
+The second type of agent that is tested is the one that was trained in a more tactical way, which should keep a distance from the enemy, get out of the enemy's crosshairs and try to flank it.
+
+\paragraph{}
+The test results can be seen in Table \ref{test_results_tank_fight_tactical:table} and in Figures \ref{test_results_tank_fight_tactical_time_bar_chart}, \ref{test_results_tank_fight_tactical_rounds_won_bar_chart}, \ref{test_results_tank_fight_tactical_times_hit_bar_chart} and \ref{test_results_tank_fight_tactical_times_got_hit_bar_chart}.
+
+Looking at the results, the agent that has a network with a single hidden layer and 256 units per layers, is the best performing one out of all the other agents, being the one to finish the test in the least amount of time, winning the most rounds, being seconds at the number of times that it manages to hit the enemy, and being the agent that got hit the least amount of times. When fighting the enemy tank, it has the tendency to try and flank the enemy, just like it was trained to do, however, most of the time it tries to rush the enemy directly. The agent with 128 units per layer performs slightly worse than the one with 256 units, while not exhibiting any of the tactical behavior that it should. The agent with 512 units per layer performed visibly worse than the one with 256 units, losing half of the rounds and taking more time to finish the test. However, it did try to move away from the enemy to try and flank it.
+
+For the agents with a network with 3 hidden layers, it seems that the best performing one is the agent that has 128 units per layer, managing to beat the other two in each category. Still, just like the one that has a single hidden layer, it did not exhibit any tactical behavior, instead opting to rush the enemy, just like the agents that were trained in a \emph{naive} way. The other two agents did manage to exhibit the correct behaviour, but it was done rarely and quite poorly.
+
+The agents with 5 hidden layer, have the best performing one be the one with 256 units per layer, managing to obtain the most victories, hitting the enemy the most times, and being hit the least out of the three. It did finish the test more slowly, however, this could be due to the fact that it managed to correctly apply what it was trained to do, and performed tactical retreats so that it could flank the enemy. Just like in Section \ref{shoot_moving_target_tactical_subsection}, the agent with 512 units performed the worst out of the three, losing more than half the rounds, missing its shots, and getting hit by the enemy. The behaviour exhibited was one of confusion, with periods of time where it would move aimlessly around the level, giving the enemy the opportunity to shoot it.
+
+Lastly, the agents with 7 hidden layers had the worst performing agent out of all the other agents tested, taking the most time to finish the test, winning the elast amount of rounds, constantly missing the target, and getting hit the most. Again, its behaviour was a confused one, choosing to move at random around the level. The other 2 agents performed better, with the agent with 256 units winning more rounds and scoring more hits than the one with 128 units, but also getting hit more.
+
+\paragraph{}
+In sumamry, just like the results obtained in Section \ref{shoot_moving_target_tactical_subsection}, the agents did not manage to fully manifest the tactical behaviour that they were trained, instead opting to mostly charge the enemy tank at shoot at it from point blank range, with the occasional retreat to try and flank it. Again, the best performing agents were the ones that had a smaller network architecture, especially those that had 256 units per layer. The agents that had more hidden layer and 512 units per layer performed the worst, perhaps due to the fact that they were not able to fully learn their objective, requiring a longer period of training. However, the behavior exhibited by these agents could still be used against a player if they would have to 
+
+\begin{table}
+    \centering
+    \begin{tabular}{|| m{11.5em} | m{5.5em} | m{4em} | m{5em} | m{6.5em} ||}
+    \hline \hline
+    \strong{Network Configuration} & \strong{Time to complete ($s$)} & \strong{Rounds won} & \strong{Successful hits} & \strong{Hits received} \\ \hline \hline
+    1 layer, 128 units & 354.3039 & 16 & 54 & 36 \\ \hline
+    1 layer, 256 units & 286.458 & 17 & 59 & 31 \\ \hline
+    1 layer, 512 units & 393.5259 & 10 & 47 & 45 \\ \hline
+    3 layers, 128 units & 381.8488 & 17 & 60 & 33 \\ \hline
+    3 layers, 256 units & 368.9066 & 15 & 55 & 38 \\ \hline
+    3 layers, 512 units & 598.802 & 15 & 56 & 37 \\ \hline
+    5 layers, 128 units & 345.1217 & 14 & 55 & 38 \\ \hline
+    5 layers, 256 units & 448.2226 & 17 & 55 & 36 \\ \hline
+    5 layers, 512 units & 499.2554 & 9 & 42 & 43 \\ \hline
+    7 layers, 128 units & 359.0904 & 13 & 54 & 34 \\ \hline
+    7 layers, 256 units & 424.311 & 16 & 56 & 37 \\ \hline
+    7 layers, 512 units & 719.5594 & 7 & 30 & 50 \\ \hline \hline
+    \end{tabular}
+    \caption{Test results for fighting an AI controlled enemy using agent that was trained using tactical method}
+    \label{test_results_tank_fight_tactical:table}
+\end{table}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_tactical_time.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the time to finish the test}
+        \label{test_results_tank_fight_tactical_time_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_tactical_rounds_won.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the number of rounds the agent won}
+        \label{test_results_tank_fight_tactical_rounds_won_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_tactical_times_hit.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the number of times the agent hit the enemy}
+        \label{test_results_tank_fight_tactical_times_hit_bar_chart}
+    \end{center}
+\end{figure}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.81\linewidth]{tank_fight_test_tactical_times_got_hit.eps}
+        \caption{Test results for fighting an AI controlled enemy representing the number of times the agent got hit by the enemy}
+        \label{test_results_tank_fight_tactical_times_got_hit_bar_chart}
+    \end{center}
+\end{figure}
