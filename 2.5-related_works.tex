@@ -1,0 +1,78 @@
+\chapter{Related Works}
+
+\section{Deep Reinforcement Learning for Navigation in AAA Video Games}
+The paper (\cite{alonso2020deeplearningnavigation}) is made by employees working at \emph{Ubisoft La Forge} and presents multiple ways in which NPC navigation is done in video games. The classic approach is represented by methods such as Waypoint Graphs and NavMeshes, while the deep learning approach is represented by a model-free Reinforcement Learning method using Soft Actor-Critic as the learning algorithm. 
+
+The experiment in the paper is trying to teach an agent how navigate from one point to another one using the RL method mentioned earlier, and making comparisons between different types of observations used.
+
+The observations made by the agent are its absolute position, velocity and acceleration, the goal's relative and absolute position, a 3D occupancy map that is made using box casts, and a 2D depth map that is made using raycasts. The action space is continuous, and correspond to movment and jump actions. The agent is rewarded if it moves closer to the objective between two consecutive timesteps. Also, a constant penalty is applied to force the agent to reach the objective as quicky as possible.
+
+In the results it is revealed that removing the absolute positions of the agent and goal, increase the agent's performance, that removing either the 3D occupancy map, or 2D depth map reduce the agent's performance, while removing both make the agent unable to reach the goal, and that using LSTMs in the agent's network improve its performance if training environment is larger, and decrease it if it's smaller. Also, a comparison is made between the approach with NavMeshes and the one with RL, with the one with RL being better in a dynamic environment.
+
+
+
+\section{On Efficient Reinforcement Learning for Full-length Game of StarCraft II}
+% 48 pag
+The paper (\cite{liu2022efficientstarcraft2}) details the implementation of an agent that is supposed to play full length \emph{StarCraft II} matches against the AI provided by the game and win. It is also tested against a smaller version of the AlphaStar AI created by DeepMind, named mini-AlphaStar.
+
+\emph{StarCraft II} is a complex RTS game that provides a challange for Reinforcement Learning approaches. The game can be regarded as an imperfect information one, due to the fact that the player can only observe what is shown by the camera, and not the entire map. In addition to that, there is also a fog of war present which further complicates the problem. Another issue is the huge action space, due to the fact that there is a large number of units and buildings.
+
+To win the match, the agent has multiple objectives such as gathering resources fast, or killing enemy units. For this, the agent's architecture is composed of multiple sub-policies that are meant to solve a smaller part of the bigger problem, and a controller. Each of the sub-policies has a local state, while the controller has a global state. The controller selects what is the active policy so that it can take actions specific to that policy. The policies are changed in a iterative process at a given number of time steps.
+
+To define the action space, a data mining operation is performed on game replays so that a sequence of actions, a macro action, can be extracted. These marco actions can be the placing of a building, sending of workers to mine resources, etc. These extracted marco actions are then sorted in order of their frequency and only the most frequent ones are kept.
+
+For learning, the algorithm that is used is PPO. A curriculum learning method is used to train the agent. This means that the agent is pitted against easier versions of the game's AI, and as training progresses, the game's AI difficulty is increased. This is used because starting to learn from scratch against a difficult AI may prove challenging, and the agent may not be able to learn anything.
+
+There are multiple types of reward functions that can be used. The first one is the outcome of the match, if the agent won or lost against the AI. This is not a good reward function since it is sparse and does not tell the agent anything about the actions taken during the match. Another type of reward is the score provided at the end of the match, which gives more information about the agent's performance but still is not the optimal choice. The selected reward function is a custom one, that contains reward functions for each of the sub-policies and thus provides the best learning experience for each of the agent's desired behaviours.
+
+The results obtained are that the trained agent had a much higher winrate against the mini-AlphaStar AI, that is trained for the same amount of time, managing to obtain a winrate of 93\% against the hardest non cheating AI in the game. Against the hardest cheating AI in the game it obtains a winrate of 86\%.
+
+
+
+\section{Lucy-SKG: Learning to Play Rocket League Efficiently Using Deep Reinforcement Learning}
+% 24 pag
+The paper (\cite{moschopoulos2023lucyskgrocketleague}) presents the implementation of a Reinforcement Learning-based model that is able to play the video game \emph{Rocket League} and also beat the two best ranking bots developed for this game, Necto and Nexto. The proposed solution uses sample-efficient Reinforcement Learning techniques, being faster to train than the previously mentioned bots and a novel technique named Kinesthetic Reward Combination (KRC). The agent uses PPO as the learning algorithm.
+
+Due to the fact that the game has a high complexity, modelling the reward function is also difficult. For example, the scoring a \emph{Goal} is the agent's objective and provides a big reward, however it is rarely obtained, and the agent may not understand how it got to receive that reward. The solution to this is the using of a reward function that is defined as a linear combination of different reward function components that are also weighted. This provides a continuous reward function.
+
+To help with the development of \emph{Lucy-SKG}, the authors developed a Python library: \emph{rlgym-reward-analysis}. It is used to visualize the reward functions as contour plots and extract reward values from the frames that are located in replay files.
+
+The observation space is split into three parts: the first part contains information about the current player, the second part is a key-value byte array that represents a sequence of important objects for the agent to be mindful about, and the third part is a key padding mask which enables the agent to be trained in a vectorized environment.
+
+The results are measured as the number of one-goal matches that are won. Lucy-SKG is pitted against Necto and Nexto which are both trained at 1 billion steps. Lucy-SKG manages to achieve a win percentage of 100\% against both bots. However, the agent is not yet able to outperform humans at this game.
+
+
+
+\section{Gotta Learn Fast: A New Benchmark for Generalization in RL}
+% 21 pag
+The paper (\cite{nichol2018gottalearnfast}) is made by employees working at OpenAI and presents multiple ways to train an agent to play the video games \emph{Sonic The Hedgehog}\texttrademark, \emph{Sonic The Hedgehog}\texttrademark\emph{2} and \emph{Sonic 3 \& Knuckles} using thier Gym Retro framework. 
+
+The experiment in the paper consists of using transfer learning and other Reinforcement Learning methods that train the agent from scratch, to learn how to play and finish various levels from the game. The RL algorithms that were used are: Rainbow (a variant of DQN), JERK (Just Enough Retained Knowledge), PPO, Joint PPO, Joint Rainbow.
+
+The agent's observation are 24-bit RGB images that have the resolution 320x224, and which represent the images of the game shown by the emulator. The action space consists of single or multiple button presses, that are valid in the context of the game, or an empty action, which means no button presses. The agent is rewarded based on how far it managed to get in the level, which is measured by its position on the X axis. Since the player's start position is on the left side of the level, and its end is on the right side, this is a valid method of measuring progress. However, there are certain instances where the agent has to move in the left direction to progress. Another reward is granted if the agent manages to finish the level. This reward starts from a given value and then decreases over time.
+
+In the results, the RL mehtods are greatly outperformed by a human, with the human being more than twice as better as the trained agents. The best RL algorithm was Joint PPO, followed by Rainbow \& Joint Rainbow, JERK, and finally, PPO. Another conclusion was that the transfer learning method was not much better than the method where the agent is trained from scratch.
+
+
+
+\section{Creating Pro-Level AI for a Real-Time Fighting Game Using Deep Reinforcement Learning}
+% 8 pag
+The paper (\cite{oh2020creatingprolevelaiforfightinggame}) describes the implementation of an agent in a 1v1 fighting game, \emph{Blade and Soul}, using a self-play curriculum and an actor-critic off-policy learning method. The trained agents are then pitted against professional gamers to test them.
+
+An inovation brought by this paper is the usage of a self-play curriculum. Three types of agents are trained: aggressive, defensive and balanced, each with different rewards and penalties based on their desired behaviour. When training, network parameters for agents are saved at certain intervals and are then added to the pool of opponents. Each opponent in this pool has a probability to be chosen to fight the agent that is currently training which is higher if the opponent has a newer network configuration. Thus, agents can train against multiple types of opponents while also using specific behaviours.
+
+Another used technique is that of data skipping. This consists of maintaining the actions chosen by the agent for a given number of timesteps and not changing the action at each timestep, and discarding the usage of a \enquote{no-op} or empty action, which means that the agent does nothing, it does not move or use any skill. By using this technique of data skip, the agent's winrate during the training process increases significantly compared to the win rate of the agent that does not use this technique.
+
+When fighting against a human opponent, another limitation is added to the trained agents, which is a delay for taking actions, so that the AI does not have an unfair advantage ofer the human player. The results were that the 3 types of trained agents managed to achieve a combined average win rate of 62\% against professional gamers, which means that the trained AI was on par with advanced human players, even with the introduced handicap in the form of an action delay.
+
+
+
+\section{Counter-Strike Deathmatch with Large-Scale Behavioural Cloning}
+% 24 pag
+The paper (\cite{pearce2021counterstrike}) presents the implementation of an AI agent that is trained to play the game \emph{Counter-Strike; Global Offensive} (CSGO) from pixel input using behavioural cloning. Compared to other FPS games, like Doom, which can be run on just the CPU, CSGO has much higher system requirements, thus the idea of using behavioural cloning came about. The authors would spectate online matches and record them so that they will be used for training. Then, the authors would record clean footage of them playing the game, which allows for the clean labelling of actions and also allow the agent to specialise to a high-skill policy. The agent will be trained on an aim training map, and on the famous \emph{Dust 2} map, in deathmatches.
+
+The agent's observation space is represented as a 280x150 pixels image, which is obtained in the following way: the game is rendered at a resolution of 1024x768 pixels; afterwards it is croppped, removing UI elements, to an image with a resolution of 824x498 pixels; finally it is downscaled to the resolution of 280x150 pixels. This is done so that the agent can be run at a \emph{playable} framerate on an average consumer GPU.
+
+Modelling the action space is a more complex task: in game several actions need to be considered such as character movement, camera movement and other actions such as shooting or reloading. For this, a discrete action space was used. Also, to use multiple actions at the same time, such as moving the character and the camera at the same time, independent losses were used for the actions: for actions done by using keys and mouse clicks a binary cross entropy loss was used, and for the mouse axis a multinomial cross entropy loss was used.
+
+There are 3 criterias for which the agent is evaluated: the score obtained in game, how much the agent performs like a human, which is measured by observing its map coverage, and the agent's ability to adapt to new maps. The obtained results show that the agent is able to perform like a casual gamer on the aim training map, and on the \emph{Dust 2} map it is able to beat the in-game AI on the \emph{Easy} and \emph{Medium} difficulties. The map coverage is similar to the coverage in the training dataset, however it is not as good as the in-game AI. The agent is also able to adapat what it has learned to new maps, with the results being worse than the ones obtained on \emph{Dust 2}, however quickly improving if the agent is trained on the new map too.

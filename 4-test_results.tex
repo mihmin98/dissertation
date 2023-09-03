@@ -103,7 +103,7 @@ In summary, here too, having a smaller number of units per layer seems to increa
 \end{figure}
 
 
-\subsection{Results comparasion}
+\subsection{Results comparison}
 Comparing the obtained results from the two approaches, the better one was when using an agent that was trained to reach static targets. The best time for this agent was 170.9822 seconds, while the best time obtained by the agent that was trained to reach moving targets was 187.1074 seconds, which is 16.1252 seconds slower ($8.61\%$). It is worth noting that both of these results came from architectures that had 5 hidden network layers and 128 units per layer.
 
 The fact that the best result for reaching a static target was achieved by an agent that was trained to reach static targets is not surprising, since it was trained for this exact specific scenario.
@@ -212,13 +212,13 @@ In summary, the best agent was the one that had an architecture with 1 hidden la
     \end{center}
 \end{figure}
 
-\subsection{Results comparasion}
+\subsection{Results comparison}
 Comparing the obtained results, it can be seen that the agent who was trained to reach static targets, performs better than the agent trained to reach moving targets. The fastest agent trained to reach static targets finished the test in 427.4408 seconds, while the fastest agent trained to reach moving targets finished the test in 452.052 seconds, being slower by 24.6112 seconds ($5.75\%$). This means that training an agent for a particular task could make it perform a more advanced version of that task better than an agent trained specifically for that advanced task. It is also worth noting that both agents had a network with a single hidden layer.
 
 
 \section{Shooting a moving target} \label{test_shoot_moving_target}
 
-For shooting a moving target, the test is built just like it is described in Section \ref{test_reach_moving_target}, the only difference being that the agent is not supposed to reach the target, but to shoot it. The two types of trained agents will be tested, however, comparasions between them regarding how fast can they finish the test are not as important as before, since one of the approaches is supposed to be more aggressive (the \emph{naive} one), and the other is supposed to be more defensive (the tactical one), with the result being that the more aggressive apporach should finish the test faster.
+For shooting a moving target, the test is built just like it is described in Section \ref{test_reach_moving_target}, the only difference being that the agent is not supposed to reach the target, but to shoot it. The two types of trained agents will be tested, however, comparisons between them regarding how fast can they finish the test are not as important as before, since one of the approaches is supposed to be more aggressive (the \emph{naive} one), and the other is supposed to be more defensive (the tactical one), with the result being that the more aggressive apporach should finish the test faster.
 
 \subsection{Agent trained in a \emph{naive} manner}
 
@@ -266,7 +266,7 @@ In summary, the fastest architectures were the ones that had only 128 units per 
 
 
 \paragraph{}
-Just like in Section \ref{subsubsection:shoot_naive}, there will be a comparasion between the results obtained when changing the bullet observations. Each agent will have an architecture with a certain number of hidden layers and 128 units per layer. The observation combinations are the following:
+Just like in Section \ref{subsubsection:shoot_naive}, there will be a comparison between the results obtained when changing the bullet observations. Each agent will have an architecture with a certain number of hidden layers and 128 units per layer. The observation combinations are the following:
 \begin{itemize}
     \item Bullet's trajectory and speed, and if the bullet was fired
     \item Bullet's speed and if the bullet was fired
@@ -373,7 +373,7 @@ Just like in the previous section (Section \ref{test_shoot_moving_target}), both
 
 \subsection{Agent trained in a \emph{naive} manner}
 
-The first type of agent that is tested is the one trained in a naive way, which means its only goal is to shoot the target no matter what. This should lead to a more aggressive and reckless approach. Unlike the previous section, there will be no comparasions between different observations for the bullet, since it was seen that the best observation combination regarding the bullet was the one where it is observed only if the bullet is fired.
+The first type of agent that is tested is the one trained in a naive way, which means its only goal is to shoot the target no matter what. This should lead to a more aggressive and reckless approach. Unlike the previous section, there will be no comparisons between different observations for the bullet, since it was seen that the best observation combination regarding the bullet was the one where it is observed only if the bullet is fired.
 
 \paragraph{}
 The test results can be seen in Table \ref{test_results_tank_fight_naive:table} and in Figures \ref{test_results_tank_fight_naive_time_bar_chart}, \ref{test_results_tank_fight_naive_rounds_won_bar_chart}, \ref{test_results_tank_fight_naive_times_hit_bar_chart} and \ref{test_results_tank_fight_naive_times_got_hit_bar_chart}.

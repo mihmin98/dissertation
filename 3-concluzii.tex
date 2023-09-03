@@ -50,22 +50,22 @@ In order for the agent to be able to learn to solve a specific problem, in this 
 To begin, the first reward that was implemented, was the reward for reaching the objective, which is the goal of the agent and should also be a substantial reward. The other rewards that ware added were based on the direction of the movement and how close to the target it was, the reward increasing in value if the agent was closer to the objective (\ref{reward:1}) and a reward if the raycasts are hitting the destination object, which also increases in value if the agent is closer to the target (\ref{reward:2}). 
 
 \begin{equation} \label{reward:1}
-    R = \frac{(1 - \frac{\alpha}{180}) \cdot r}{d}
+    R_\text{distance to target} = \frac{(1 - \frac{\alpha}{180}) \cdot r}{d}
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R_\text{dist to target}$]: is the obtained reward
     \item [$\alpha$]: is the angle between the agent's current direction and the optimal direction
     \item [$r$]: is the reward that is obtained if the agent has the optimal direction
     \item [$d$]: is the distance from the agent to the objective
 \end{itemize}
 
 \begin{equation} \label{reward:2}
-    R = \frac{r}{d_{i}}
+    R_\text{ray distance} = \frac{r}{d_{i}}
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R_\text{ray dist}$]: is the obtained reward
     \item [$r$]: is the reward obtained if the distance between the agent and the objective is minimum
     \item [$d_{i}$]: is the obtained distance by the raycast $i$ from the agent to the object
 \end{itemize}
@@ -77,11 +77,11 @@ To solve these problems, several punishments were implemented to correct the beh
 To stop the agent from trying to pass thorugh walls, a penalty is added if the raycasts that hit walls or other objects in the environment, have the distance to the hit object be a smaller than a given number. This penalty also increases the closer the agent gets to a wall (\ref{punishment:1}). 
 
 \begin{equation} \label{punishment:1}
-    R = \frac{p}{d_{i}}, \text{if } d_{i} < d
+    R_\text{wall penalty} = \frac{p}{d_{i}}, \text{if } d_{i} < d
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R_\text{wall penalty}$]: is the obtained reward
     \item [$p$]: is the penalty obtained if the distance between the agent and the wall/environmental object is minimum
     \item [$d_{i}$]: is the obtained distance by the raycast $i$ from the agent to the object
     \item [$d$]: is the maximum distance for which the penalty is applied
@@ -90,11 +90,11 @@ where:
 Another penalty was added if the agent is moving away from objective, and as before, it increases the further away it gets from the objective (\ref{punishment:2}). 
 
 \begin{equation} \label{punishment:2}
-    R = \frac{\alpha}{180} \cdot p
+    R_\text{moving away} = \frac{\alpha}{180} \cdot p
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R_\text{moving away}$]: is the obtained reward
     \item [$p$]: is the penalty obtained if the distance between the agent and the wall/environmental object is minimum
     \item [$\alpha$]: is the angle between the agent's current direction and the optimal direction
 \end{itemize}
@@ -102,26 +102,26 @@ where:
 Through training, two undesirable behaviours were observed: it was observed that the agent would sometimes make sudden jerky movments, trying to change its direction and immediatly returning to its previous trajectory, and that the agent would learn to drive backwards. To fix the first problem, a penalty was added if the agent would change its direction (\ref{punishment:3}), and to fix the second one, a penalty was added if the tank was moving backwards (\ref{punishment:4}).
 
 \begin{equation} \label{punishment:3}
-    R = \frac{\alpha}{180} \cdot p
+    R_\text{direction change} = \frac{\alpha}{180} \cdot p
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R_\text{dir change}$]: is the obtained reward
     \item [$p$]: is the penalty obtained for changing the movement direction
     \item [$\alpha$]: is the angle between the agent's current direction and its previous direction
 \end{itemize}
 
 \begin{equation} \label{punishment:4}
-    R = \frac{\alpha}{180} \cdot p, \text{if } \alpha > 90
+    R_\text{backwards} = \frac{\alpha}{180} \cdot p, \text{if } \alpha > 90
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
-    \item [$p$]: is the penalty obtained for changing the movement direction
+    % \item [$R_\text{backwards}$]: is the obtained reward
+    \item [$p$]: is the penalty obtained for moving backwards
     \item [$\alpha$]: is the angle between the agent's current direction and its forward vector
 \end{itemize}
 
-In summary, the used rewards and penalites and their values can be seen in table \ref{reward_punish_table:1}
+In summary, the used rewards and penalites and their values can be seen in Table \ref{reward_punish_table:1}.
 
 \begin{table}
     \centering
@@ -143,11 +143,21 @@ In summary, the used rewards and penalites and their values can be seen in table
     \label{reward_punish_table:1}
 \end{table}
 
+The final reward function can be expressed as:
+\begin{equation}
+    R = \mathbb{1}_\text{target} + \alpha + R_\text{distance to target} + R_\text{ray distance} + R_\text{wall penalty} + R_\text{moving away} + R_\text{direction change} + R_\text{backwards}
+\end{equation}
+where:
+\begin{itemize}
+    \item [$R$]: is the total reward
+    \item [$\mathbb{1}_\text{target}$]: is the reward obtained for reaching the target
+    \item [$\alpha$]: is the constant penalty
+\end{itemize}
 
 
 \subsection{Training} \label{static_target:training}
 
-Each training session consisted of $10^7$ steps, and 30 agents were trained in parallel. The training times were between 3-4 hours. The agents are supposed to learn to reach an objective which appears in one of 17 predefined positions on the map. Once the agent reaches the objective, it is moved in another location chosen randomly. Each separate training instance uses the same seed for the random number generator, so that the objectives will appear in the same order for each of the training instances. Each training episode has a limit of $5000$ steps.
+Each training session consisted of $10^7$ steps, and 30 agents were trained in parallel. The training times were between 3-4 hours. The agents are supposed to learn to reach an objective which appears in one of 17 predefined positions on the map. Once the agent reaches the objective, it is moved in another location chosen randomly. The objective is reprezented as a cuboid, as it can be seen in Figure \ref{photo:tank_chasing_target}, for better visualization of the training process. Each separate training instance uses the same seed for the random number generator, so that the objectives will appear in the same order for each of the training instances. Each training episode has a limit of $5000$ steps.
 
 \begin{figure}
     \begin{center}
@@ -278,7 +288,7 @@ Another standard behavior of an AI in video games is to be able to chase a targe
 Again, the proposed solution would be to use AI agents that are trained using deep learning methods.
 
 \subsection{Implementing the solution} \label{moving_target:implementation}
-The basic implementation for this problem is the same as the one described at \ref{static_target:implementation}, with the same observations, rewards and penalties being used. The addition would be to add an observation that is the direction in which the target is moving. This can be used by the agent to predict in which direction the target is moving and to eventually intercept it along its trajectory. Another idea would be to add memory to the agent, in the form of LSTM, so that it can achieve this result in a more \enquote{natural} way.
+The basic implementation for this problem is the same as the one described at \ref{static_target:implementation}, with the same observations, rewards and penalties being used. The addition would be to add an observation that is the direction in which the target is moving. This can be used by the agent to predict in which direction the target is moving and to eventually intercept it along its trajectory. Another idea would be to add memory to the agent, in the form of LSTM, so that it can achieve this result in a more \emph{natural} way.
 
 \subsection{Training} \label{moving_target:training}
 The training is similar to the process described at \ref{static_target:training}, with the same number of agents being trained at the same time, same number of steps, same hyperparameters (Table \ref{static_target_hyperparameters}), etc. 
@@ -300,7 +310,7 @@ Results for training the agent with a single network layer and without the targe
 \end{figure}
 
 
-Results for training the agent with 3 network layers and without the target's direction obsrevation can be seen in Figure \ref{train_results_moving_3_layers} and Table \ref{move_to_moving_targets_table:1}. In these results, it seems that the configuration with $128$ units obtains better results during training than teh configuration with $256$ units, which in turn obtains better results than the one with $512$ units. At the end of the training, the configuration with $128$ units is better by $1.02\%$ than the one with $256$ units and better by $28.58\%$ than the one with $512$ units.
+Results for training the agent with 3 network layers and without the target's direction obsrevation can be seen in Figure \ref{train_results_moving_3_layers} and Table \ref{move_to_moving_targets_table:1}. In these results, it seems that the configuration with $128$ units obtains better results during training than the configuration with $256$ units, which in turn obtains better results than the one with $512$ units. At the end of the training, the configuration with $128$ units is better by $1.02\%$ than the one with $256$ units and better by $28.58\%$ than the one with $512$ units.
 
 \begin{figure}
     \begin{center}
@@ -433,11 +443,11 @@ In summary, the following observations have been added:
 Finally, new rewards and punishments were implemented. Firstly, the agent is no longer rewarded if it touches the target, it has to hit it with a bullet. To incentivise firing a bullet, a small reward is received when firing a bullet. Also, a penalty is added if the bullet misses the target, and disappears because it has travelled a certain distance, or it hit an environmental object. The other bullet reward that was added is a reward that is based on the bullet's trajectory and how close it is to the optimal trajectory to the target and is scaled by the distance from the bullet to the target, with the reward increasing the closer the bullet gets to the target. This reward is defined using Formula \ref{bullet:1}:
 
 \begin{equation} \label{bullet:1}
-    R = \frac{(1 - \frac{\alpha}{180}) \cdot r}{d} \cdot 2
+    R_\text{bullet trajectory} = \frac{(1 - \frac{\alpha}{180}) \cdot r}{d} \cdot 2
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R_\text{bullet trajectory}$]: is the obtained reward
     \item [$\alpha$]: is the angle between the bullet's current trajectory and the optimal trajectory
     \item [$r$]: is the reward that is obtained if the bullet has the optimal trajectory
     \item [$d$]: is the distance from the bullet to the target
@@ -446,14 +456,14 @@ where:
 Two punishments were added to help the agent learn as if it were fighting a real opponent. The first one makes the agent stay at a given distance from the target, so that the agent will not try to stay glued to the target while trying to shoot it. This punishment is computed using Fomrula \ref{punishment:shoot_1}:
 
 \begin{equation} \label{punishment:shoot_1}
-    R = \begin{cases}
+    R_\text{desired distance} = \begin{cases}
         \frac{d - d'}{50} \cdot p & \text{for } d \geq d' \\
         \frac{p}{d} & \text{else}
     \end{cases}
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R$]: is the obtained reward
     \item [$d$]: is the distance from the agent to the target, that is clamped in the interval $[0, 50]$
     \item [$d'$]: is the desired distance from the agent to the target
     \item [$p$]: is the penalty for the agent not being at desired distance $d'$ from the target
@@ -462,11 +472,11 @@ where:
 The second punishment is applied when the agent is in front of the target, which means that the target can attack it. This punishment is added to try and teach the agent that it should flank its target so that it can attack it while being safe from being shot at. The punishment is computed using Formula \ref{punishment:shoot_2}
 
 \begin{equation} \label{punishment:shoot_2}
-    R = (1 - \frac{\alpha}{180}) \cdot p
+    R_\text{in target's crosshair} = (1 - \frac{\alpha}{180}) \cdot p
 \end{equation}
 where:
 \begin{itemize}
-    \item [$R$]: is the total reward
+    % \item [$R$]: is the obtained reward
     \item [$\alpha$]: is the angle between the target's forward vector and the vector from the target to the agent
     \item [$p$]: is the penalty for being in front of the target
 \end{itemize}
@@ -574,7 +584,7 @@ The final results for all configurations can be seen in Figure \ref{train_result
 \end{figure}
 
 \paragraph{}
-In the second part of the trainings, the agent is trained using a configuration of 128 units per network layer, since this yielded the best results in the previous phase, and different observations regarding the bullet. The first observation combination uses all three bullet observations: if the bullet is fired, its trajectory vector and its speed; the second observation combination contains only two bullet observations: the bullet's speed and if the bullet is fired; and the final combination contains only the observation that tells if the bullet was fired. This comparasion is made to see if adding more observations would increase the agent's performance, or decrease it, similar to what happened when adding the target's movement direction to the observations in Section \ref{moving_target:training}.
+In the second part of the trainings, the agent is trained using a configuration of 128 units per network layer, since this yielded the best results in the previous phase, and different observations regarding the bullet. The first observation combination uses all three bullet observations: if the bullet is fired, its trajectory vector and its speed; the second observation combination contains only two bullet observations: the bullet's speed and if the bullet is fired; and the final combination contains only the observation that tells if the bullet was fired. This comparison is made to see if adding more observations would increase the agent's performance, or decrease it, similar to what happened when adding the target's movement direction to the observations in Section \ref{moving_target:training}.
 
 Results for training the agent with a single network layer can be seen in Figure \ref{train_results_shoot_obs_comparasion_1_layers} and Table \ref{shoot_moving_targets_table:2}. All 3 observation combinations yield very similar results, with the variant that observes only if the bullet is fired being slightly better then the other two. It is better by $16.91\%$ than the observation combination with both bullet trajectory and speed, and better by $10.12\%$ than the combination with the bullet's speed.
 
@@ -701,7 +711,7 @@ Training the agent with a network with 5 layers obtains the results that can be 
 
 
 \paragraph{}
-In summary, for this type of agent, a smaller network architecture should be used, since it obtains better results, with networks with over 3 hidden layers having a heavily readuced performance. Also, configurations with over 128 units per layer should be used, since the ones with 128 units perform worse in comparasion to the others, but only when the number of hidden layers is small.
+In summary, for this type of agent, a smaller network architecture should be used, since it obtains better results, with networks with over 3 hidden layers having a heavily readuced performance. Also, configurations with over 128 units per layer should be used, since the ones with 128 units perform worse in comparison to the others, but only when the number of hidden layers is small.
 
 \begin{table}
     \centering
