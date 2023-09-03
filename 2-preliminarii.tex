@@ -19,7 +19,7 @@ Because of this, Reinforcement Learning can be modeled as a Markov Decision Proc
     \item [$\gS$]: is the state space
     \item [$\gA$]: is the action space
     \item [$T$]: is the transition function; it is defined as $T: \gS \times \gA \times \gS \rightarrow [0, 1]$, and represents the probability that an action $a \in \gA$ will lead from state $s \in \gS$ to state $s' \in gS$
-    \item [$R$]: is the reward function; it is defined as $R: \gS \times \gA \times \gS \rightarrow \gR$, and represents the reward obtained when moving from state state $s \in \gS$ to state $s' \in gS$ because of action $a \in \gA$
+    \item [$R$]: is the reward function; it is defined as $R: \gS \times \gA \times \gS \rightarrow \gR$, and represents the reward obtained when moving from state $s \in \gS$ to state $s' \in gS$ because of action $a \in \gA$
 \end{itemize}
 
 Another notion of Reinforcement Learning is the policy, which shows how an agent selects the action that it will take. It can be defined as $\pi: \gA \times \gS \rightarrow [0, 1]$, where $\pi(a, s)$ is the probability of action $a$ being chosen while in state $s$.
@@ -62,7 +62,7 @@ with $r_t(\theta)$ being defined as:
 
 $r_t(\theta)$ being the probability ratio. It can be seen that the probability function is clipped in order for the surrogate objective to be modified.
 
-The PPO algorithm that uses fixed-length trajectory segments as defined in \cite{schulman2017ppo} can be seen in Alogrithm \ref{alg:ppo}
+The PPO algorithm that uses fixed-length trajectory segments as defined in \cite{schulman2017ppo} can be seen in Algorithm \ref{alg:ppo}
 
 \begin{algorithm}
     \caption{PPO, Actor-Critic Style}\label{alg:ppo}
@@ -83,7 +83,7 @@ At each iteration, each of the $N$ actors collect $T$ timesteps of data, then th
 
 \section{Unity \& ML-Agents Toolkit}
 
-The environment where the solution will be implemented will be a Unity project consisting of a small level that has different structures an objects, and which contains tanks that can move, shoot, and fight eachother. The project also contains an AI implementation that is based on behaviour trees and genetic algorithms and is described in more detail in \cite{paduraru2019automatic}. The project can be found at \url{https://github.com/AGAPIA/BTreeGeneticFramework}. The level that is contained in the mentioned project, and that will be used for training, can be seen in Figure \ref{photo:tank_training_env}.
+The environment where the solution will be implemented will be a Unity project consisting of a small level that has different structures and objects, and which contains tanks that can move, shoot, and fight each other. The project also contains an AI implementation that is based on behaviour trees and genetic algorithms and is described in more detail in \cite{paduraru2019automatic}. The project can be found at \url{https://github.com/AGAPIA/BTreeGeneticFramework}. The level that is contained in the mentioned project, and that will be used for training, can be seen in Figure \ref{photo:tank_training_env}.
 
 \begin{figure}
     \begin{center}
