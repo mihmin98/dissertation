@@ -1,7 +1,8 @@
 \chapter{Related Works}
 
-\section{Deep Reinforcement Learning for Navigation in AAA Video Games}
-The paper (\cite{alonso2020deeplearningnavigation}) is made by employees working at \emph{Ubisoft La Forge} and presents multiple ways in which NPC navigation is done in video games. The classic approach is represented by methods such as Waypoint Graphs and NavMeshes, while the deep learning approach is represented by a model-free Reinforcement Learning method using Soft Actor-Critic as the learning algorithm. 
+% \section{Deep Reinforcement Learning for Navigation in AAA Video Games}
+\paragraph{}
+The paper \cite{alonso2020deeplearningnavigation} is made by employees working at \emph{Ubisoft La Forge} and presents multiple ways in which NPC navigation is done in video games. The classic approach is represented by methods such as Waypoint Graphs and NavMeshes, while the deep learning approach is represented by a model-free Reinforcement Learning method using Soft Actor-Critic as the learning algorithm. 
 
 The experiment in the paper is trying to teach an agent how navigate from one point to another one using the RL method mentioned earlier, and making comparisons between different types of observations used.
 
@@ -11,9 +12,10 @@ In the results it is revealed that removing the absolute positions of the agent 
 
 
 
-\section{On Efficient Reinforcement Learning for Full-length Game of StarCraft II}
+% \section{On Efficient Reinforcement Learning for Full-length Game of StarCraft II}
+\paragraph{}
 % 48 pag
-The paper (\cite{liu2022efficientstarcraft2}) details the implementation of an agent that is supposed to play full length \emph{StarCraft II} matches against the AI provided by the game and win. It is also tested against a smaller version of the AlphaStar AI created by DeepMind, named mini-AlphaStar.
+The paper \cite{liu2022efficientstarcraft2} details the implementation of an agent that is supposed to play full length \emph{StarCraft II} matches against the AI provided by the game and win. It is also tested against a smaller version of the AlphaStar AI created by DeepMind, named mini-AlphaStar.
 
 \emph{StarCraft II} is a complex RTS game that provides a challenge for Reinforcement Learning approaches. The game can be regarded as an imperfect information one, due to the fact that the player can only observe what is shown by the camera, and not the entire map. In addition to that, there is also a fog of war present which further complicates the problem. Another issue is the huge action space, due to the fact that there is a large number of units and buildings.
 
@@ -29,23 +31,25 @@ The results obtained are that the trained agent had a much higher win rate again
 
 
 
-\section{Lucy-SKG: Learning to Play Rocket League Efficiently Using Deep Reinforcement Learning}
+% \section{Lucy-SKG: Learning to Play Rocket League Efficiently Using Deep Reinforcement Learning}
+\paragraph{}
 % 24 pag
-The paper (\cite{moschopoulos2023lucyskgrocketleague}) presents the implementation of a Reinforcement Learning-based model that is able to play the video game \emph{Rocket League} and also beat the two best ranking bots developed for this game, Necto and Nexto. The proposed solution uses sample-efficient Reinforcement Learning techniques, being faster to train than the previously mentioned bots and a novel technique named Kinesthetic Reward Combination (KRC). The agent uses PPO as the learning algorithm.
+The paper \cite{moschopoulos2023lucyskgrocketleague} presents the implementation of a RL model that is able to play the video game \emph{Rocket League} and also beat the two best ranking bots developed for this game, Necto and Nexto. The proposed solution uses sample-efficient Reinforcement Learning techniques, being faster to train than the previously mentioned bots and a novel technique named Kinesthetic Reward Combination (KRC). The agent uses PPO as the learning algorithm.
 
 Due to the fact that the game has a high complexity, modelling the reward function is also difficult. For example, the scoring a \emph{Goal} is the agent's objective and provides a big reward, however it is rarely obtained, and the agent may not understand how it got to receive that reward. The solution to this is the using of a reward function that is defined as a linear combination of different reward function components that are also weighted. This provides a continuous reward function.
 
 To help with the development of \emph{Lucy-SKG}, the authors developed a Python library: \emph{rlgym-reward-analysis}. It is used to visualize the reward functions as contour plots and extract reward values from the frames that are located in replay files.
 
-The observation space is split into three parts: the first part contains information about the current player, the second part is a key-value byte array that represents a sequence of important objects for the agent to be mindful about, and the third part is a key padding mask which enables the agent to be trained in a vectorized environment.
+The observation space is split into three parts: the first part contains information about the current player, the second part is a key-value byte array that represents a sequence of important objects for the agent to be mindful about, and the third part is a mask which enables the agent to be trained using multiple stacked environments.
 
 The results are measured as the number of one-goal matches that are won. Lucy-SKG is pitted against Necto and Nexto which are both trained at 1 billion steps. Lucy-SKG manages to achieve a win percentage of 100\% against both bots. However, the agent is not yet able to outperform humans at this game.
 
 
 
-\section{Gotta Learn Fast: A New Benchmark for Generalization in RL}
+% \section{Gotta Learn Fast: A New Benchmark for Generalization in RL}
+\paragraph{}
 % 21 pag
-The paper (\cite{nichol2018gottalearnfast}) is made by employees working at OpenAI and presents multiple ways to train an agent to play the video games \emph{Sonic The Hedgehog}\texttrademark, \emph{Sonic The Hedgehog}\texttrademark\emph{2} and \emph{Sonic 3 \& Knuckles} using their Gym Retro framework. 
+The paper \cite{nichol2018gottalearnfast} is made by employees working at OpenAI and presents multiple ways to train an agent to play the video games \emph{Sonic The Hedgehog}\texttrademark, \emph{Sonic The Hedgehog}\texttrademark\emph{2} and \emph{Sonic 3 \& Knuckles} using their Gym Retro framework. 
 
 The experiment in the paper consists of using transfer learning and other Reinforcement Learning methods that train the agent from scratch, to learn how to play and finish various levels from the game. The RL algorithms that were used are: Rainbow (a variant of DQN), JERK (Just Enough Retained Knowledge), PPO, Joint PPO, Joint Rainbow.
 
@@ -55,9 +59,10 @@ In the results, the RL methods are greatly outperformed by a human, with the hum
 
 
 
-\section{Creating Pro-Level AI for a Real-Time Fighting Game Using Deep Reinforcement Learning}
+% \section{Creating Pro-Level AI for a Real-Time Fighting Game Using Deep Reinforcement Learning}
+\paragraph{}
 % 8 pag
-The paper (\cite{oh2020creatingprolevelaiforfightinggame}) describes the implementation of an agent in a 1v1 fighting game, \emph{Blade and Soul}, using a self-play curriculum and an actor-critic off-policy learning method. The trained agents are then pitted against professional gamers to test them.
+The paper \cite{oh2020creatingprolevelaiforfightinggame} describes the implementation of an agent in a 1v1 fighting game, \emph{Blade and Soul}, using a self-play curriculum and an actor-critic off-policy learning method. The trained agents are then pitted against professional gamers to test them.
 
 An innovation brought by this paper is the usage of a self-play curriculum. Three types of agents are trained: aggressive, defensive and balanced, each with different rewards and penalties based on their desired behaviour. When training, network parameters for agents are saved at certain intervals and are then added to the pool of opponents. Each opponent in this pool has a probability to be chosen to fight the agent that is currently training which is higher if the opponent has a newer network configuration. Thus, agents can train against multiple types of opponents while also using specific behaviours.
 
@@ -67,9 +72,10 @@ When fighting against a human opponent, another limitation is added to the train
 
 
 
-\section{Counter-Strike Deathmatch with Large-Scale Behavioural Cloning}
+% \section{Counter-Strike Deathmatch with Large-Scale Behavioural Cloning}
+\paragraph{}
 % 24 pag
-The paper (\cite{pearce2021counterstrike}) presents the implementation of an AI agent that is trained to play the game \emph{Counter-Strike; Global Offensive} (CSGO) from pixel input using behavioural cloning. Compared to other FPS games, like Doom, which can be run on just the CPU, CSGO has much higher system requirements, thus the idea of using behavioural cloning came about. The authors would spectate online matches and record them so that they will be used for training. Then, the authors would record clean footage of them playing the game, which allows for the clean labelling of actions and also allow the agent to specialize to a high-skill policy. The agent will be trained on an aim training map, and on the famous \emph{Dust 2} map, in deathmatches.
+The paper \cite{pearce2021counterstrike} presents the implementation of an AI agent that is trained to play the game \emph{Counter-Strike; Global Offensive} (CSGO) using the frames that are presented to the player, by using behavioural cloning. Compared to other First Person Shooter games, like Doom, which can be run on just the CPU, CSGO has much higher system requirements, thus the idea of using behavioural cloning came about. The authors would spectate online matches and record them so that they will be used for training. Then, the authors would record clean footage of them playing the game, which allows for the clean labelling of actions and also allow the agent to specialize to a high-skill policy. The agent will be trained on an aim training map, and on the famous \emph{Dust 2} map, in deathmatches.
 
 The agent's observation space is represented as a 280x150 pixels image, which is obtained in the following way: the game is rendered at a resolution of 1024x768 pixels; afterwards it is cropped, removing UI elements, to an image with a resolution of 824x498 pixels; finally, it is downscaled to the resolution of 280x150 pixels. This is done so that the agent can be run at a \emph{playable} framerate on an average consumer GPU.
 

@@ -13,7 +13,7 @@ A proposed solution for this problem would be to use AI agents that have been tr
 
 \subsection{Implementing the solution} \label{static_target:implementation}
 \paragraph{}
-First, the action space for the agent is defined: due to the fact that we only need to move the agent to a given position, the action space consists of moving the agent forward or backward, and rotating it. Because the agent is supposed to be controlled by a controller, its movement input is defined as a real number in the $[-1, 1]$ interval for both $X$ and $Y$ axes. However, a discrete action space will be used instead of a continuous one to reduce the difficulty of learning, and also because there is no need for the agent to have movements that are so precise. For each axis the action space will be represented by the discrete space: $\{-1, -0.5, 0, 0.5, 1\}$.
+First, the agent's action space is established: due to the fact that we only need to move the agent to a given position, the action space consists of moving the agent forward or backward, and rotating it. Because the agent is supposed to be controlled by a controller, its movement input is defined as a real number in the $[-1, 1]$ interval for both $X$ and $Y$ axes. However, a discrete action space will be used instead of a continuous one to reduce the difficulty of learning, and also because there is no need for the agent to have movements that are so precise. For each axis the action space will be represented by the discrete space: $\{-1, -0.5, 0, 0.5, 1\}$.
 
 \paragraph{}
 To make decisions, the agent will need to make several observations about its surroundings. Firstly, it will need to know how close it is to certain objects in the environment. To accomplish this, several \emph{raycasts} will be used to measure the distance from the agent, similar to a \emph{LIDAR}. The raycasts start from the center of the agent and are spread in such a way that the angle between 2 consecutive rays is equal for any 2 consecutive rays. The observation will contain the distance until the rays hit an object. Also, the index of the layer of the hit object will be included in the observations, so that the agent will differentiate between regular environment objects and more important objects, such as other players, enemies, etc. For this implementation, 32 rays were used. A visual representation can be seen in Figure \ref{photo:tank_raycasts}
@@ -27,7 +27,7 @@ To make decisions, the agent will need to make several observations about its su
 \end{figure}
 % (TODO: add ceva despre lidar si un paper https://oceanservice.noaa.gov/facts/lidar.html)
 
-Other observations that are made are the agent's position in space and also that of the target. This observation is included so that the agent can learn how movement brings it closer or further to the target. The next observation is the agent's forward vector so it can know in which direction it is moving. The optimal direction that the agent should take is also observed and obtained by computing the vector difference between the target's position and the agent's position. To know how much to adjust its trajectory, the angle between the agent's forward vector and the target is observed; the angle is signed so that the agent can learn to adjust its trajectory to the left or to the right. The distance to the target is added to the observations so that the agent can learn that when the distance is getting smaller it is rewarded. The agent's normalized velocity vector is observed to show in which direction it is moving based on the given input. The angle between the agent's velocity vector and its forward vector is observed to tell if the agent is moving forwards or backwards. Finally, the agent's velocity magnitude is observed so the agent can know if it is moving or standing still. 
+Other observations that are made are the agent's position in space and also that of the target. This observation is included so that the agent can learn how movement brings it closer or further to the target. The next observation is the agent's forward vector so it can know in which direction it is moving. The optimal direction that the agent should take is also observed and obtained by computing the vector difference between the target's absolute position and the agent's absolute position. To know how much to adjust its trajectory, an observation of the angle between the target and the tank's forward vector is made; the angle is signed so that the agent can learn to adjust its trajectory to the left or to the right. The distance to the target is added to the observations so that the agent can learn that when the distance is getting smaller it is rewarded. The agent's normalized velocity vector is observed to show in which direction it is moving based on the given input. The angle that is made by the agent's velocity vector and its forward vector is observed to tell if the agent is moving forwards or backwards. Finally, the agent's velocity magnitude is observed so the agent can know if it is moving or standing still. 
 
 In summary the following observations are being made:
 \begin{itemize}
@@ -37,15 +37,15 @@ In summary the following observations are being made:
     \item spatial position of the target
     \item agent's forward vector
     \item optimal direction of the agent
-    \item signed angle between the agent's forward vector and the target
+    \item signed angle between the vector from the agent to the target and the agent's forward vector
     \item distance from the target
     \item agent's normalized velocity vector
-    \item angle between the agent's velocity vector and its forward vector
+    \item angle that the agent's velocity vector and its forward vector make
     \item agent's velocity magnitude
 \end{itemize}
 
 \paragraph{}
-In order for the agent to be able to learn to solve a specific problem, in this case, to reach a target, it must be rewarded or punished according to the actions that were taken. It is important to be mindful of the rewards that are given to the agent because only giving rewards and not punishing it can lead the agent to learn a behaviour that will maximize its reward, but will not be able to solve the problem, as it will be described shortly.
+In order for the agent to be able to learn to solve a specific problem, in this case, to reach a target, it must be rewarded or punished according to the actions that were taken. It is important to be mindful of the rewards that are given to the agent because only giving rewards and not punishing it can lead the agent to learn a certain way of acting that will maximize its reward, but will not be able to solve the problem, as it will be described shortly.
 
 To begin, the first reward that was implemented, was the reward for reaching the objective, which is the goal of the agent and should also be a substantial reward. The other rewards that ware added were based on the direction of the movement and how close to the target it was, the reward increasing in value if the agent was closer to the objective (\ref{reward:1}) and a reward if the raycasts are hitting the destination object, which also increases in value if the agent is closer to the target (\ref{reward:2}). 
 
@@ -55,7 +55,7 @@ To begin, the first reward that was implemented, was the reward for reaching the
 where:
 \begin{itemize}
     % \item [$R_\text{dist to target}$]: is the obtained reward
-    \item [$\alpha$]: is the angle between the agent's current direction and the optimal direction
+    \item [$\alpha$]: is the angle formed by the optimal movement direction and the agent's current movement direction
     \item [$r$]: is the reward that is obtained if the agent has the optimal direction
     \item [$d$]: is the distance from the agent to the objective
 \end{itemize}
@@ -82,7 +82,7 @@ To stop the agent from trying to pass through walls, a penalty is added if the r
 where:
 \begin{itemize}
     % \item [$R_\text{wall penalty}$]: is the obtained reward
-    \item [$p$]: is the penalty obtained if the distance between the agent and the wall/environmental object is minimum
+    \item [$p$]: is the penalty obtained if the distance from the wall/environmental object to the agent is minimum
     \item [$d_{i}$]: is the obtained distance by the raycast $i$ from the agent to the object
     \item [$d$]: is the maximum distance for which the penalty is applied
 \end{itemize}
@@ -95,8 +95,8 @@ Another penalty was added if the agent is moving away from objective, and as bef
 where:
 \begin{itemize}
     % \item [$R_\text{moving away}$]: is the obtained reward
-    \item [$p$]: is the penalty obtained if the distance between the agent and the wall/environmental object is minimum
-    \item [$\alpha$]: is the angle between the agent's current direction and the optimal direction
+    \item [$p$]: is the penalty obtained if the distance from the agent to the wall/environmental object is minimum
+    \item [$\alpha$]: is the angle made by the optimal movement direction and the agent's current movement direction
 \end{itemize}
 
 Through training, two undesirable behaviours were observed: it was observed that the agent would sometimes make sudden jerky movements, trying to change its direction and immediately returning to its previous trajectory, and that the agent would learn to drive backwards. To fix the first problem, a penalty was added if the agent would change its direction (\ref{punishment:3}), and to fix the second one, a penalty was added if the tank was moving backwards (\ref{punishment:4}).
@@ -108,7 +108,7 @@ where:
 \begin{itemize}
     % \item [$R_\text{dir change}$]: is the obtained reward
     \item [$p$]: is the penalty obtained for changing the movement direction
-    \item [$\alpha$]: is the angle between the agent's current direction and its previous direction
+    \item [$\alpha$]: is the angle between the agent's previous movement direction and its current one
 \end{itemize}
 
 \begin{equation} \label{punishment:4}
@@ -167,7 +167,7 @@ Each training session consisted of $10^7$ steps, and 30 agents were trained in p
     \end{center}
 \end{figure}
 
-In the initial training sessions, the agents were unable to learn to reach the objective, becoming stuck rotating in a circle. A proposed solution was to keep the objective in the same position until the agent reaches it 30 times. After reaching the objective 30 times, the objective would start appearing in the random predefined locations. This was done to possibly kickstart the agent's learning process, but the approach failed, the agent being unable to learn to reach the objective. Another approach was to increase the neural network's size, however this approach proves unsuccessful as well. The approach that worked was to remove the agent's position and the objective's position from the observations. 
+In the initial training sessions, the agents were unable to learn to reach the objective, becoming stuck rotating in a circle. A proposed solution was to keep the objective in the same position until the agent reaches it 30 times. After reaching the objective 30 times, the objective would start appearing in the random predefined locations. This was done to possibly kickstart the agent's learning process, but the approach failed, the agent being unable to learn to reach the objective. Another approach was to increase the neural network's size, however this approach proves unsuccessful as well. The approach that worked was to remove the agent's absolute position and the objective's absolute position from the observations. 
 % TODO: sa zic de curiosity
 
 The agent's training process was done using multiple neural network configurations, including different number of network layers ($1$, $3$, $5$, $7$) and different number of units per layer ($128$, $256$, $512$).
@@ -192,7 +192,7 @@ The hyperparameters used for the training can be seen in Table \ref{static_targe
 \end{table}
 
 \paragraph{}
-The results for training the agent with 1 network layer can be seen in Figure \ref{train_results_static_1_layers}, and in Table \ref{move_to_static_targets_table:1}. In this case, the configuration with $256$ units was not able to be trained properly, remaining stuck moving in a circle. Between the two configurations that were successfully trained, it can be seen that the one with $128$ units, performed better during the training process than the one with $512$ units, obtaining, at the end, a mean reward that is higher by $18.79\%$.
+The results for training the agent with 1 network layer are in Figure \ref{train_results_static_1_layers}, and Table \ref{move_to_static_targets_table:1}. In this case, the configuration with $256$ units was not able to be trained properly, remaining stuck moving in a circle. Between the two configurations that were successfully trained, it can be seen that the one with $128$ units, performed better during the training process than the one with $512$ units, obtaining, at the end, a mean reward that is higher by $18.79\%$.
 
 
 \begin{figure}
@@ -205,7 +205,7 @@ The results for training the agent with 1 network layer can be seen in Figure \r
 
 
 % \paragraph{}
-The results for training the agent with 3 network layers can be seen in Figure \ref{train_results_static_3_layers}, and in Table \ref{move_to_static_targets_table:1}. From these results, it can be seen that the configurations with $128$ and $256$ units, performed very similarly during the training, however, the one with $512$ units started to lag behind these two at around $4 \cdot 10^6$ steps. Again, the configuration with the least units had the best training results, obtaining a result that is $2.61\%$ better than the one with $256$ units and better by $29\%$ than the one with $512$ units. 
+The results for training the agent with 3 network layers are in Figure \ref{train_results_static_3_layers}, and Table \ref{move_to_static_targets_table:1}. From the obtained, it can be seen that the configurations with $128$ and $256$ units, performed very similarly during the training, however, the one with $512$ units started to lag behind these two at around $4 \cdot 10^6$ steps. Again, the configuration with the least units had the best training results, obtaining a result that is $2.61\%$ better than the one with $256$ units and better by $29\%$ than the one with $512$ units. 
 
 \begin{figure}
     \begin{center}
@@ -217,7 +217,7 @@ The results for training the agent with 3 network layers can be seen in Figure \
 
 
 % \paragraph{}
-Results for training the agent with 5 network layers can be seen in Figure \ref{train_results_static_5_layers}, and in Table \ref{move_to_static_targets_table:1}. From the training results, it can be seen that in the later stages, the configuration with $256$ units falls behind the other two. Unlike the results with 1 layer and 3 layers, the best performing configuration is the one with $512$ units per layer, being better by $8.72\%$ than the configuration with $128$ units, and by $35.45\%$ than the configuration with $256$ units.
+Results for training the agent with 5 network layers are in Figure \ref{train_results_static_5_layers}, and in Table \ref{move_to_static_targets_table:1}. From the training results, it can be seen that in the later stages, the configuration with $256$ units falls behind the other two. Unlike the results with 1 layer and 3 layers, the best performing configuration is the one with $512$ units per layer, being better by $8.72\%$ than the configuration with $128$ units, and by $35.45\%$ than the configuration with $256$ units.
 
 \begin{figure}
     \begin{center}
@@ -239,7 +239,7 @@ Results for training the agent with 7 network layers can be seen in Figure \ref{
 \end{figure}
 
 \paragraph{}
-All the training results can be seen in Table \ref{move_to_static_targets_table:1} and in Figure \ref{train_results_static_bar_chart}. It can be observed that network configurations with a smaller number of units per layer obtained better training results than the others. This could be due to the fact that the problem is not a very complex one, and because a smaller network can be trained faster. The configurations with 1, 3, or 5 layers obtained similar results, however, when 7 layers are used, there is a noticeable decrease in the agent's performance. These being said, from the training results it seems that using a network configuration with less layers and less units per layer offers almost the best result, thus it is the most practical one to be used, since it uses the least computing resources. Using larger networks should be done by training the agent for longer periods of time. However, it is possible when using a smaller network to obtain an unusable model, as was the case in this experiment using a network configuration with 1 hidden layer and 256 units per layer.
+All the training results are in Table \ref{move_to_static_targets_table:1} and in Figure \ref{train_results_static_bar_chart}. It can be observed that network configurations with a smaller number of units per layer obtained better training results than the others. This could be due to the fact that the problem is not a very complex one, and because a smaller network can be trained faster. The configurations with 1, 3, or 5 layers obtained similar results, however, when 7 layers are used, there is a recognizable decrease in the agent's performance. These being said, from the training results it seems that using a network configuration with less layers and less units per layer offers almost the best result, thus it is the most practical one to be used, since it uses the least computing resources. Using larger networks should be done by training the agent for longer periods of time. However, it is possible when using a smaller network to obtain an unusable model, as was the case in this experiment using a network configuration with 1 hidden layer and 256 units per layer.
 
 \begin{table}
     \centering
@@ -281,7 +281,7 @@ All the training results can be seen in Table \ref{move_to_static_targets_table:
 
 
 \subsection{The Problem} \label{moving_target:the_problem}
-Another standard behavior of an AI in video games is to be able to chase a target, so that it can, maybe, perform a specific action once the object controlled by the AI is close enough to the target . A simple way to achieve this behavior would be to use a \emph{NavMesh} and periodically change the agent's destination. Compared to the problem described at \ref{static_target:the_problem}, the addition here is that the agent has to recompute its route at specified intervals.
+Another standard behavior of an AI in video games is to be able to chase a target, so that it can, maybe, perform a specific action once the object controlled by the AI is close enough to the target. A simple method to accomplish this behavior would be to use a \emph{NavMesh} and periodically change the agent's destination. Compared to the problem described at \ref{static_target:the_problem}, the addition here is that the agent has to recompute its route at specified intervals.
 % (TODO: sa mai dezvolt asta)
 
 \paragraph{}
@@ -299,7 +299,7 @@ Trying to add memory to the agent was a failure, the agent being unable to learn
 Training this agent was done in 2 separate ways: one where the target's direction is not in the observations, and one where it is. The first round of training is done without the observation that was mentioned previously.
 
 \paragraph{}
-Results for training the agent with a single network layer and without the target's direction observation can be seen in Figure \ref{train_results_moving_1_layers} and Table \ref{move_to_moving_targets_table:1}. From these results it can be seen that all 3 configurations performed virtually identically, and at the end of the training had obtained the same mean reward.
+Results for training the agent with a single network layer and without the target's direction observation are in Figure \ref{train_results_moving_1_layers} and in Table \ref{move_to_moving_targets_table:1}. It can be seen that all 3 configurations performed virtually identically, and had reached the same mean reward by the end of the training.
 
 \begin{figure}
     \begin{center}
@@ -310,7 +310,7 @@ Results for training the agent with a single network layer and without the targe
 \end{figure}
 
 
-Results for training the agent with 3 network layers and without the target's direction observation can be seen in Figure \ref{train_results_moving_3_layers} and Table \ref{move_to_moving_targets_table:1}. In these results, it seems that the configuration with $128$ units obtains better results during training than the configuration with $256$ units, which in turn obtains better results than the one with $512$ units. At the end of the training, the configuration with $128$ units is better by $1.02\%$ than the one with $256$ units and better by $28.58\%$ than the one with $512$ units.
+Results for training the agent with 3 network layers and without the target's direction observation are in Figure \ref{train_results_moving_3_layers} and in Table \ref{move_to_moving_targets_table:1}. From the obtained results, it seems that the configuration with $128$ units obtains better results during training than the configuration with $256$ units, which in turn obtains better results than the one with $512$ units. At the end of the training, the configuration with $128$ units is better by $1.02\%$ than the one with $256$ units and better by $28.58\%$ than the one with $512$ units.
 
 \begin{figure}
     \begin{center}
@@ -321,7 +321,7 @@ Results for training the agent with 3 network layers and without the target's di
 \end{figure}
 
 
-Results for training the agent with 5 network layers and without the target's direction observation can be seen in Figure \ref{train_results_moving_5_layers} and Table \ref{move_to_moving_targets_table:1}. The results during training are similar to the configuration with 3 layers, with the configuration with $128$ units being better than the other two. The final result is that the configuration with $128$ units is better by $8.87\%$ than the one with $256$ units and better by $17.9\%$ than the one with $512$ units.
+Results for training the agent with 5 network layers and without the target's direction observation are in Figure \ref{train_results_moving_5_layers} and Table \ref{move_to_moving_targets_table:1}. The results during training are similar to the previously described configuration that had three hidden layers, with the configuration with $128$ units being better than the other two. The final result is that the configuration with $128$ units is better by $8.87\%$ than the one with $256$ units and better by $17.9\%$ than the one with $512$ units.
 
 \begin{figure}
     \begin{center}
@@ -335,7 +335,7 @@ Results for training the agent with 5 network layers and without the target's di
 \paragraph{}
 The second round of training is done by adding the target's movement direction to the agent's observations.
 
-The results for training the agent with a single network layer and without the target's direction observation can be seen in Figure \ref{train_results_moving_1_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. As in the previous cases, the best performed configuration during training is the one with the least units, i.e., 128 units. This one is better by $39.47\%$ than the configuration with 256 units, and by $6.88\%$ than the one with 512 units.
+The results for training the agent with a single network layer and with the target's direction observation are in Figure \ref{train_results_moving_1_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. As in the previous cases, the best performed configuration during training is the one with the least units, i.e., 128 units. This one is better by $39.47\%$ than the configuration with 256 units, and by $6.88\%$ than the one with 512 units.
 
 \begin{figure}
     \begin{center}
@@ -345,7 +345,7 @@ The results for training the agent with a single network layer and without the t
     \end{center}
 \end{figure}
 
-Training the agent with a network with 3 layers obtains the results that can be seen in Figure \ref{train_results_moving_3_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. This time, all 3 configurations performed very similarly during training. The best configuration here was the one with 512 units which was better by $4.99\%$ than the one with 128 units, and by $7.37\%$ than the one with 256 units.
+Training the agent with a network with 3 layers and with the target's direction observation obtains the results that are in Figure \ref{train_results_moving_3_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. This time, all 3 configurations performed very similarly during training. The best configuration here was the one with 512 units which was better by $4.99\%$ than the one with 128 units, and by $7.37\%$ than the one with 256 units.
 
 \begin{figure}
     \begin{center}
@@ -355,7 +355,7 @@ Training the agent with a network with 3 layers obtains the results that can be 
     \end{center}
 \end{figure}
 
-Results for training the agent with 5 network layers and without the target's direction observation can be seen in Figure \ref{train_results_moving_5_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. It can be observed that the configuration with 128 units outperforms the other two during training, the other two performing mostly identically until the final training steps, where the one with 512 units slightly overtakes the one with 128 units. The configuration with 512 units is better by $1.26\%$ than the one with 128 units and better by $17.93\%$ than the one with 256 units.
+Results for training the agent with 5 network layers and with the target's direction observation are in Figure \ref{train_results_moving_5_layers_with_dir} and Table \ref{move_to_moving_targets_table:1}. It can be observed that the configuration with 128 units outperforms the other two during training, the other two performing mostly identically until the final training steps, where the one with 512 units slightly overtakes the one with 128 units. The configuration with 512 units is better by $1.26\%$ than the one with 128 units and better by $17.93\%$ than the one with 256 units.
 
 \begin{figure}
     \begin{center}
@@ -369,7 +369,7 @@ Results for training the agent with 5 network layers and without the target's di
 \paragraph{}
 Looking at the final results in Figure \ref{train_results_moving_bar_chart} and Table \ref{move_to_moving_targets_table:1} we can observe that the best network configurations have either 128 units per layer or 512 units per layer. When increasing the number of layers and not using the target's movement direction as an observation, the agent's performance slightly decreased during the training. Adding the target's movement direction as an observation increases the performance of the agent, compared to the configuration with the same number of layers and without this observation. 
 
-In conclusion, from these training results, it seems that adding the target's moving direction to the observations improves the agent's performance, the best results are achieved with either 128 or 512 units per hidden layer, and the best number of hidden layers is 3. The difference between using 128 units instead of 512 is a $\sim5\%$ decline in the agent's performance. If there are no reasons to reduce resource usage, the configuration with 3 hidden layers and 512 units per layer should be used.
+In conclusion, from these training results, it seems that adding the target's moving direction to the observations improves the agent's performance, the best results are achieved with either 128 or 512 units per hidden layer, and the best number of hidden layers is 3. The difference between using 128 units instead of 512 is a $\sim5\%$ decline in the agent's performance. If there are no reasons to reduce resource usage, the configuration with three hidden layers and 512 units per layer should be used.
 
 \begin{table}
     \centering
@@ -464,9 +464,9 @@ Two punishments were added to help the agent learn as if it were fighting a real
 where:
 \begin{itemize}
     % \item [$R$]: is the obtained reward
-    \item [$d$]: is the distance from the agent to the target, that is clamped in the interval $[0, 50]$
-    \item [$d'$]: is the desired distance from the agent to the target
-    \item [$p$]: is the penalty for the agent not being at desired distance $d'$ from the target
+    \item [$d$]: is the distance between the target and the agent, and it is clamped in the interval $[0, 50]$
+    \item [$d'$]: is the distance between the target and the agent that is desired
+    \item [$p$]: is the penalty for the agent not having the desired distance $d'$ between it and the target
 \end{itemize}
 
 The second punishment is applied when the agent is in front of the target, which means that the target can attack it. This punishment is added to try and teach the agent that it should flank its target so that it can attack it while being safe from being shot at. The punishment is computed using Formula \ref{punishment:shoot_2}
@@ -493,7 +493,7 @@ In addition to the rewards and penalties already being used, described in Table 
     Bullet's Trajectory is Optimal Reward & 0.001 & is scaled by the distance between bullet and target \\ \hline
     Miss Target Penalty & -0.1 &  \\ \hline
     Agent Not At Desired Distance Penalty & -0.005 & is scaled by the difference of the desired distance and distance between agent and object \\ \hline
-    Agent In Front Of Target Penalty & -0.05 & is scaled by the angle between the target's front vector and the vector from the target to the agent \\ \hline \hline
+    Agent In Front Of Target Penalty & -0.05 & is scaled by the angle formed by the target's front vector and the vector from the target to the agent \\ \hline \hline
     \end{tabular}
     \caption{New Rewards and Penalties for agent that is shooting a moving target}
     \label{reward_punish_table:2}
@@ -511,7 +511,7 @@ As mentioned above, this approach only cares about the agent shooting the target
 It is also worth noting that during the first trainings, the only observation regarding the bullet that was used is the one that tells if the bullet is fired.
 
 \paragraph{}
-Results for training the agent with a single network layer can be seen in Figure \ref{train_results_shoot_1_layers} and Table \ref{shoot_moving_targets_table:1}. As with the previous agents, the best performing configuration during training is the one with 128 units per layer, while the other two lag behind it. The configuration with 128 units was better by $32.12\%$ than the one with 256 units, and better by $10\%$ than the one with 512 units.
+Results for training the agent with a single network layer are in Figure \ref{train_results_shoot_1_layers} and in Table \ref{shoot_moving_targets_table:1}. As with the previous agents, the best performing configuration during training is the one with 128 units per layer, while the other two lag behind it. The configuration with 128 units was better by $32.12\%$ than the one with 256 units, and better by $10\%$ than the one with 512 units.
 
 \begin{figure}
     \begin{center}
@@ -521,7 +521,7 @@ Results for training the agent with a single network layer can be seen in Figure
     \end{center}
 \end{figure}
 
-The results for training the agent with 3 network layers are in Figure \ref{train_results_shoot_3_layers} and Table \ref{shoot_moving_targets_table:1}. Here, the configuration with 128 units clearly overtakes the other two during most of the training process. The configuration with 128 units was better by $16.75\%$ than the one with 256 units, and better by $41.25\%$ than the one with 512 units at the end of the training.
+The results for training the agent with 3 network layers are in Figure \ref{train_results_shoot_3_layers} and Table \ref{shoot_moving_targets_table:1}. Here, the configuration with 128 units clearly overtakes the other two during most of the training process. The configuration with 128 units was better by $16.75\%$ than the one with 256 units, and better by $41.25\%$ than the one with 512 units at the training's end.
 
 \begin{figure}
     \begin{center}
@@ -531,7 +531,7 @@ The results for training the agent with 3 network layers are in Figure \ref{trai
     \end{center}
 \end{figure}
 
-Training the agent with a network with 5 layers obtains the results that can be seen in Figure \ref{train_results_shoot_5_layers} and Table \ref{shoot_moving_targets_table:1}. The situation is similar to the previous ones, meaning that the configuration with 128 units still performs the best. It is better by $1.76\%$ than the one with 256 units and better by $29.38\%$ than the one with 512 units per layer.
+Training the agent with a network with 5 layers obtains the results that are in Figure \ref{train_results_shoot_5_layers} and in Table \ref{shoot_moving_targets_table:1}. The situation is similar to the previous ones, meaning that the configuration with 128 units still performs the best. It is better by $1.76\%$ than the one with 256 units and better by $29.38\%$ than the one with 512 units per layer.
 
 \begin{figure}
     \begin{center}
@@ -541,7 +541,7 @@ Training the agent with a network with 5 layers obtains the results that can be 
     \end{center}
 \end{figure}
 
-Results for training the agent with 7 network layers can be seen in Figure \ref{train_results_shoot_7_layers} and Table \ref{shoot_moving_targets_table:1}. Again, as in the previous cases, the configuration with the smallest number of units per layer performs better than the other ones during training. The configuration with 128 units performs better by $10.76\%$ than the one with 256 units, and better by $29.09\%$ than the one with 512 units per layer.
+Results for training the agent with 7 network layers are in Figure \ref{train_results_shoot_7_layers} and in Table \ref{shoot_moving_targets_table:1}. Again, as in the previous cases, the configuration with the smallest number of units per layer performs better than the other ones during training. The configuration with 128 units performs better by $10.76\%$ than the one with 256 units, and better by $29.09\%$ than the one with 512 units per layer.
 
 \begin{figure}
     \begin{center}
@@ -551,7 +551,7 @@ Results for training the agent with 7 network layers can be seen in Figure \ref{
     \end{center}
 \end{figure}
 
-The final results for all configurations can be seen in Figure \ref{train_results_shoot_bar_chart} and Table \ref{shoot_moving_targets_table:1}. From here we can deduce that using a smaller network with fewer units per layer gives the best results during training. Increasing the number of layers decreased the performance of the agent in every single case by up to $\sim40\%$. Thus, it can be clearly inferred that using a network architecture with 1 layer and 128 units per layer should give the best performance of the agent, and also use the least amount of computing resources.
+The final results for all configurations are in Figure \ref{train_results_shoot_bar_chart} and in Table \ref{shoot_moving_targets_table:1}. From here we can deduce that using a smaller network with fewer units per layer gives the best results during training. Incrementing the number of layers decreased the performance of the agent in every single case by up to $\sim40\%$. Thus, it can be clearly inferred that using a network architecture with 1 layer and 128 units per layer should give the best performance of the agent, and also use the least amount of computing resources.
 
 \begin{table}
     \centering
@@ -584,9 +584,9 @@ The final results for all configurations can be seen in Figure \ref{train_result
 \end{figure}
 
 \paragraph{}
-In the second part of the trainings, the agent is trained using a configuration of 128 units per network layer, since this yielded the best results in the previous phase, and different observations regarding the bullet. The first observation combination uses all three bullet observations: if the bullet is fired, its trajectory vector and its speed; the second observation combination contains only two bullet observations: the bullet's speed and if the bullet is fired; and the final combination contains only the observation that tells if the bullet was fired. This comparison is made to see if adding more observations would increase the agent's performance, or decrease it, similar to what happened when adding the target's movement direction to the observations in Section \ref{moving_target:training}.
+In the second part of the trainings, the agent is trained using a configuration of 128 units per network layer, since this yielded the best results in the previous phase, and different observations regarding the bullet. The first observation combination uses all three bullet observations: if the bullet is fired, its trajectory vector and its speed; the second observation combination contains only two bullet observations: the bullet's speed and if the bullet is fired; and the final combination contains only the observation that tells if the bullet was fired. This comparison is made to see if adding more observations would increase the agent's performance, or decrease it, similar to what happened when adding the target's direction of movement to the observations in Section \ref{moving_target:training}.
 
-Results for training the agent with a single network layer can be seen in Figure \ref{train_results_shoot_obs_comparasion_1_layers} and Table \ref{shoot_moving_targets_table:2}. All 3 observation combinations yield very similar results, with the variant that observes only if the bullet is fired being slightly better than the other two. It is better by $16.91\%$ than the observation combination with both bullet trajectory and speed, and better by $10.12\%$ than the combination with the bullet's speed.
+Results for training the agent with a single network layer are in Figure \ref{train_results_shoot_obs_comparasion_1_layers} and in Table \ref{shoot_moving_targets_table:2}. All 3 observation combinations yield very similar results, with the variant that observes only if the bullet is fired being slightly better than the other two. It is better by $16.91\%$ than the observation combination with both bullet trajectory and speed, and better by $10.12\%$ than the combination with the bullet's speed.
 
 \begin{figure}
     \begin{center}
@@ -606,7 +606,7 @@ The results for training the agent with 3 network layers are in Figure \ref{trai
     \end{center}
 \end{figure}
 
-Training the agent with a network with 5 layers obtains the results that can be seen in Figure \ref{train_results_shoot_obs_comparasion_5_layers} and Table \ref{shoot_moving_targets_table:2}. Again, training results are very similar for all 3 combinations. Here, the best one is the combination with both bullet trajectory and speed being better by $11.69\%$ than the combination with the bullet's speed, and better by $18.01\%$ the one that only observes if the bullet was fired.
+Training the agent with a network with 5 layers obtains the results that are in Figure \ref{train_results_shoot_obs_comparasion_5_layers} and in Table \ref{shoot_moving_targets_table:2}. Again, training results are very similar for all 3 combinations. Here, the best one is the combination with both bullet trajectory and speed being better by $11.69\%$ than the combination with the bullet's speed, and better by $18.01\%$ the one that only observes if the bullet was fired.
 
 \begin{figure}
     \begin{center}
@@ -616,7 +616,7 @@ Training the agent with a network with 5 layers obtains the results that can be 
     \end{center}
 \end{figure}
 
-Results for training the agent with 7 network layers can be seen in Figure \ref{train_results_shoot_obs_comparasion_7_layers} and Table \ref{shoot_moving_targets_table:2}. All 3 combinations perform virtually identically having a maximum difference in agent performance of $\sim3\%$.
+Results for training the agent with 7 network layers are in Figure \ref{train_results_shoot_obs_comparasion_7_layers} and in Table \ref{shoot_moving_targets_table:2}. All 3 combinations perform virtually identically having a maximum difference in agent performance of $\sim3\%$.
 
 \begin{figure}
     \begin{center}
@@ -627,7 +627,7 @@ Results for training the agent with 7 network layers can be seen in Figure \ref{
 \end{figure}
 
 
-The final results for all configurations can be seen in Figure \ref{train_results_shoot_obs_comparasion_bar_chart} and Table \ref{shoot_moving_targets_table:2}. As with the first training stage, increasing the number of layers leads to a poorer performing agent. Also, there were no huge differences when introducing the new bullet observations, with the new observation combinations performing the same or slightly worse than when observing only if the bullet was fired. The only exception is when using a network with 5 layers, where adding the bullet's trajectory and speed to the observations obtains a performance that is $18.01\%$ better than if not including them. However, the best performing configuration still remains the one with 1 layer, and where the only observation about the bullet is if it was fired.
+The final results for all configurations are in Figure \ref{train_results_shoot_obs_comparasion_bar_chart} and in Table \ref{shoot_moving_targets_table:2}. As with the first training stage, increasing the number of layers leads to a poorer performing agent. Also, there were no huge differences when introducing the new bullet observations, with the new observation combinations performing the same or slightly worse than when observing only if the bullet was fired. The only exception is when using a network with 5 layers, where adding the bullet's trajectory and speed to the observations obtains a performance that is $18.01\%$ better than if not including them. However, the best performing configuration still remains the one with 1 layer, and where the only observation about the bullet is if it was fired.
 
 \begin{table}
     \centering
@@ -669,7 +669,7 @@ In conclusion, when comparing the two approaches of adding or not multiple bulle
 This approach tries to mimic a more realistic fighting scenario, where the target would shoot back at the agent. Thus, through the newly added punishments, described in Formulae \ref{punishment:shoot_1} and \ref{punishment:shoot_2}, the agent should learn to keep a certain distance from the target, and also to flank it. Here, the only bullet observation that is made, is if the bullet was fired or not. This decision was made based on the training results obtained when training the agent in a more \emph{naive} way, in the above experiment. Also, introducing more observations would require the agent to train for a larger number of steps to efficiently use them, if possible, and since the number of training steps still remains $10^7$, and new penalties were added, this would lead to a poorer performing agent. 
 
 \paragraph{}
-Results for training the agent with a single network layer can be seen in Figure \ref{train_results_shoot_v2_1_layers} and Table \ref{shoot_moving_targets_v2_table:1}. The configurations with 256 and 512 units per layer had similar performances during the training, however the one with 128 units began to fall behind these two at around $6 \cdot 10^6$ steps. The best performing configuration was the one with 256 units.
+Results for training the agent with a single network layer are in Figure \ref{train_results_shoot_v2_1_layers} and in Table \ref{shoot_moving_targets_v2_table:1}. The configurations with 256 and 512 units per layer had similar performances during the training, however the one with 128 units began to fall behind these two at around $6 \cdot 10^6$ steps. The best performing configuration was the one with 256 units.
 
 \begin{figure}
     \begin{center}
@@ -689,7 +689,7 @@ The results for training the agent with 3 network layers are in Figure \ref{trai
     \end{center}
 \end{figure}
 
-Results for training the agent with 5 network layers can be seen in Figure \ref{train_results_shoot_v2_5_layers} and Table \ref{shoot_moving_targets_v2_table:1}. During the training, the configuration with 128 units per layer performs better than the one with 256 units, while the one with 512 falls behind these two by a large amount.
+Results for training the agent with 5 network layers are in Figure \ref{train_results_shoot_v2_5_layers} and in Table \ref{shoot_moving_targets_v2_table:1}. During the training, the configuration with 128 units per layer performs better than the one with 256 units, while the one with 512 falls behind these two by a large amount.
 
 \begin{figure}
     \begin{center}
@@ -699,7 +699,7 @@ Results for training the agent with 5 network layers can be seen in Figure \ref{
     \end{center}
 \end{figure}
 
-Training the agent with a network with 5 layers obtains the results that can be seen in Figure \ref{train_results_shoot_v2_7_layers} and Table \ref{shoot_moving_targets_v2_table:1}. The results are similar to the ones obtained with an architecture with 5 hidden layers with the configuration with 128 units per layer performing better than the one with 256 units, and the one with 512 units greatly falling behind these two.
+Training the agent with a network with 5 layers obtains the results that are in Figure \ref{train_results_shoot_v2_7_layers} and in Table \ref{shoot_moving_targets_v2_table:1}. The results are similar to the ones obtained with an architecture with 5 hidden layers with the configuration with 128 units per layer performing better than the one with 256 units, and the one with 512 units greatly falling behind these two.
 
 \begin{figure}
     \begin{center}
